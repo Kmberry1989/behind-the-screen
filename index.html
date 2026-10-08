@@ -1,0 +1,1463 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0d0f14">
+<title>Behind the Screen — How Skill-Casino Apps Really Work</title>
+<style>
+:root{
+  --bg:#0d0f14; --card:#151924; --card2:#1a2030; --line:#28304a;
+  --text:#eef1f6; --muted:#9aa3b5; --faint:#6b7488;
+  --gold:#f5b942; --red:#ff5d5d; --teal:#4fd1c5; --green:#5fd97a; --purple:#b388ff; --blue:#6ea8ff;
+}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--text);
+  font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  -webkit-font-smoothing:antialiased;line-height:1.55}
+.wrap{max-width:520px;margin:0 auto;padding:0 16px 80px}
+h1,h2,h3{line-height:1.25;margin:0 0 8px}
+p{margin:0 0 12px}
+a{color:var(--teal)}
+.hero{padding:34px 0 18px;text-align:center}
+.kicker{display:inline-block;font-size:12px;letter-spacing:2px;text-transform:uppercase;color:var(--gold);
+  border:1px solid var(--gold);border-radius:999px;padding:5px 14px;margin-bottom:14px}
+.hero h1{font-size:30px;letter-spacing:-.5px}
+.hero h1 .curtain-word{color:var(--teal)}
+.hero p.sub{color:var(--muted);font-size:15px;max-width:420px;margin:10px auto 0}
+.legend{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin:16px 0 4px}
+.tag{display:inline-block;font-size:11px;font-weight:700;border-radius:6px;padding:3px 8px;letter-spacing:.3px;white-space:nowrap}
+.tag.doc{background:rgba(95,217,122,.14);color:var(--green);border:1px solid rgba(95,217,122,.4)}
+.tag.rep{background:rgba(245,185,66,.13);color:var(--gold);border:1px solid rgba(245,185,66,.4)}
+.tag.pat{background:rgba(179,136,255,.13);color:var(--purple);border:1px solid rgba(179,136,255,.4)}
+.legend-note{font-size:12px;color:var(--faint);text-align:center;margin-bottom:6px}
+nav.chips{position:sticky;top:0;z-index:50;background:rgba(13,15,20,.94);backdrop-filter:blur(8px);
+  border-bottom:1px solid var(--line);padding:10px 0}
+.chips .row{max-width:520px;margin:0 auto;padding:0 12px;display:flex;gap:8px;overflow-x:auto;scrollbar-width:none}
+.chips .row::-webkit-scrollbar{display:none}
+.chips a{flex:0 0 auto;font-size:13px;font-weight:600;color:var(--muted);text-decoration:none;
+  border:1px solid var(--line);border-radius:999px;padding:7px 13px;background:var(--card)}
+.chips a:active{background:var(--card2);color:var(--text)}
+section.block{padding:30px 0 6px}
+.eyebrow{font-size:12px;font-weight:800;letter-spacing:2px;text-transform:uppercase;color:var(--teal);margin-bottom:6px}
+section.block h2{font-size:23px;letter-spacing:-.3px;margin-bottom:8px}
+.lede{color:var(--muted);font-size:15px;margin-bottom:16px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px;margin-bottom:14px}
+.card h3{font-size:17px}
+.feel-vs{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}
+.feel-vs>div{border-radius:12px;padding:10px 12px;font-size:13px}
+.feel-vs .feel{background:rgba(110,168,255,.08);border:1px solid rgba(110,168,255,.3)}
+.feel-vs .real{background:rgba(255,93,93,.07);border:1px solid rgba(255,93,93,.3)}
+.feel-vs b{display:block;font-size:11px;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px}
+.feel-vs .feel b{color:var(--blue)} .feel-vs .real b{color:var(--red)}
+.btn{display:block;width:100%;border:0;border-radius:14px;padding:15px;font-size:16px;font-weight:800;
+  background:linear-gradient(135deg,#f5b942,#ef8f2e);color:#231603;cursor:pointer;touch-action:manipulation}
+.btn:active{transform:scale(.98)}
+.btn.ghost{background:var(--card2);color:var(--text);border:1px solid var(--line)}
+.btn.teal{background:linear-gradient(135deg,#4fd1c5,#37a8f0);color:#062a28}
+.btn:disabled{opacity:.45;cursor:default}
+.btn-row{display:flex;gap:10px;margin-top:10px}
+.btn-row .btn{margin:0}
+/* curtain switch */
+.switch-row{display:flex;align-items:center;justify-content:space-between;gap:12px;
+  background:var(--card2);border:1px dashed var(--teal);border-radius:14px;padding:12px 14px;margin:14px 0}
+.switch-row .lab{font-size:14px;font-weight:700}
+.switch{position:relative;width:58px;height:32px;flex:0 0 auto}
+.switch input{opacity:0;width:100%;height:100%;position:absolute;margin:0;cursor:pointer;z-index:2}
+.knob{position:absolute;inset:0;background:#2a3247;border-radius:999px;transition:.2s}
+.knob:before{content:"";position:absolute;left:4px;top:4px;width:24px;height:24px;border-radius:50%;background:#8b94a9;transition:.2s}
+.switch input:checked + .knob{background:rgba(79,209,197,.35)}
+.switch input:checked + .knob:before{left:30px;background:var(--teal)}
+.curtain{display:none}
+.curtain-on .curtain{display:block;animation:fadein .35s ease}
+.curtain-on .cover{position:relative}
+@keyframes fadein{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+/* opponent cards */
+.opp-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-top:12px}
+.opp{background:var(--card2);border:1px solid var(--line);border-radius:12px;padding:10px 6px;text-align:center;position:relative;overflow:hidden}
+.opp .av{font-size:26px}
+.opp .nm{font-size:11px;font-weight:700;margin-top:4px;word-break:break-word}
+.opp .st{font-size:10px;color:var(--muted)}
+.opp .stamp{display:none}
+.curtain-on .opp .stamp{display:block;position:absolute;inset:0;background:rgba(20,8,10,.88);
+  color:var(--red);font-size:11px;font-weight:800;padding:8px 4px;text-align:center}
+.curtain-on .opp .stamp small{display:block;color:var(--muted);font-weight:400;font-size:10px;margin-top:4px;line-height:1.35}
+.spinner{text-align:center;padding:22px;color:var(--muted);font-size:14px}
+.spinner .ring{display:inline-block;width:26px;height:26px;border:3px solid var(--line);border-top-color:var(--teal);
+  border-radius:50%;animation:spin 0.8s linear infinite;vertical-align:-7px;margin-right:8px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.stat-strip{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
+.stat{background:rgba(255,93,93,.06);border:1px solid rgba(255,93,93,.28);border-radius:12px;padding:12px}
+.stat .n{font-size:21px;font-weight:800;color:var(--red)}
+.stat .d{font-size:12px;color:var(--muted)}
+.note{font-size:13px;color:var(--muted);background:var(--card2);border-left:3px solid var(--teal);
+  border-radius:0 10px 10px 0;padding:10px 12px;margin:12px 0}
+.note.warn{border-left-color:var(--gold)}
+.small{font-size:12.5px;color:var(--faint)}
+.muted{color:var(--muted)}
+</style>
+</head>
+<body>
+<nav class="chips"><div class="row">
+  <a href="#phoneStage">📱 The Setup</a><a href="#matchmaking">🎭 Match</a><a href="#hook">🪝 The Hook</a><a href="#money">💸 Money Drain</a>
+  <a href="#nearmiss">🎯 Near-Miss</a><a href="#credits">🎁 Free Credits</a><a href="#help">🛟 Get Help</a><a href="#slots">🎰 Slots</a>
+</div></nav>
+<div class="wrap">
+
+<header class="hero">
+  <span class="kicker">An interactive explainer</span>
+  <h1>Behind the <span class="curtain-word">Screen</span></h1>
+  <p class="sub">How skill-based casino apps — like <b>Bingo Winner</b> by Joybox Studios — match you, hook you, and drain your wallet. Play the simulator. Pull back the curtain. Keep your money.</p>
+  <div class="legend">
+    <span class="tag doc">DOCUMENTED</span><span class="tag rep">PLAYERS REPORT</span><span class="tag pat">INDUSTRY PATTERN</span>
+  </div>
+  <p class="legend-note">Every claim below carries one of these badges. "Players report" means it shows up in reviews but isn't proven in court. We label the difference.</p>
+</header>
+
+<!-- ============ PHONE STAGE ============ -->
+<section class="block" id="phoneStage">
+  <div class="kicker">The setup</div>
+  <h2>It starts with a notification.</h2>
+  <p class="lede">Before a single ball is called, there's the most powerful slot machine ever built: your lock screen. Watch what arrives.</p>
+  <div class="phone-wrap">
+    <div class="iphone">
+      <div class="pnotch"></div>
+      <div class="pstatus"><span id="ptime">9:41</span><span>📶&nbsp;&nbsp;🔋</span></div>
+      <div class="pscreen">
+        <div class="phome" id="phome">
+          <div class="pgrid" id="pgrid"></div>
+          <div class="pdock" id="pdock"></div>
+        </div>
+        <div class="pmail" id="pmail" style="display:none">
+          <div class="pnavbar"><button class="pback" data-go="phome" aria-label="Back">‹</button><b>Inbox</b><span style="width:24px"></span></div>
+          <div class="pemail"><b>JoyBox Rewards</b><span>⏰ Last chance: your $30 bonus EXPIRES tonight!</span><i>9:41 AM ›</i></div>
+          <div class="pemail"><b>JoyBox Rewards</b><span>🔥 You're on a LUCKY STREAK — don't let it cool off!</span><i>Yesterday ›</i></div>
+          <div class="pemail"><b>JoyBox Rewards</b><span>🎁 $30 FREE bonus cash is waiting in Bingo Winner!</span><i>Tuesday ›</i></div>
+        </div>
+        <div class="pmail" id="pmailView" style="display:none">
+          <div class="pnavbar"><button class="pback" data-go="pmail" aria-label="Back to inbox">‹ Inbox</button><b></b><span style="width:24px"></span></div>
+          <div class="pmailbody">
+            <div class="pmailhead"><span class="pavatar">🎁</span><div><b>JoyBox Rewards</b><span>To: you</span></div></div>
+            <h3>Your $30 FREE bonus cash is waiting! 🎉</h3>
+            <p>Hi lucky player! We noticed you haven't played in <b>3 days</b>. Your account misses you! Here is <b>$30 in FREE bonus cash</b> — on the house!</p>
+            <p>But hurry — <b>they expire TONIGHT at midnight!</b> ⏰</p>
+            <div id="claimZone"><button class="btn gold bigbtn" id="claimBtn">CLAIM $30 FREE BONUS CASH</button></div>
+            <p class="pfine">No purchase necessary to claim. Purchase definitely necessary to keep playing after the credits run out. 😉</p>
+          </div>
+        </div>
+        <div class="pnotifs" id="pnotifs"></div>
+        <div class="ptoast" id="ptoast"></div>
+      </div>
+      <div class="phomebar"></div>
+    </div>
+  </div>
+  <p class="muted" style="text-align:center;font-size:13px">👆 Tap a notification — or the wiggling <b>🎱 Bingo Winner</b> icon — inside the phone.</p>
+  <div class="note"><b>🎓 What's happening:</b> this is the top of the funnel. Free bonus cash pulls you back in, expiry dates manufacture urgency, and "lucky streak" messages arrive exactly when you're most likely to have forgotten the app. Acts 1–7 below show what the funnel drains <i>into</i>.</div>
+</section>
+
+<!-- ============ 1 MATCHMAKING ============ -->
+<section class="block" id="matchmaking">
+  <div class="eyebrow">Act 1 · Matchmaking</div>
+  <h2>Who are you really playing against?</h2>
+  <p class="lede">The app promises you're "matched with players of your skill level." Press the button, meet your opponents — then pull back the curtain.</p>
+
+  <div class="card" id="matchCard">
+    <div id="matchIdle">
+      <button class="btn teal" id="findBtn">🔍 Find me a match</button>
+      <p class="small" style="text-align:center;margin:10px 0 0">8 players · $2.20 entry · winner takes $7</p>
+    </div>
+    <div id="matchSpin" style="display:none;text-align:center;padding:26px 0">
+      <div id="countNum" style="font-size:72px;font-weight:800;color:var(--teal);line-height:1">5</div>
+      <div id="countQuip" class="muted" style="font-size:14px;margin-top:10px">Searching for worthy opponents…</div>
+    </div>
+    <div id="matchResult" style="display:none">
+      <p class="muted" style="font-size:13px;margin-bottom:4px">✅ Match found! Five full seconds of suspense — for "opponents" that were ready before you even tapped. At 3am, instantly, every time. Ask yourself how.</p>
+      <div class="opp-grid" id="oppGrid"></div>
+      <div class="switch-row">
+        <span class="lab">🎭 Pull back the curtain</span>
+        <label class="switch"><input type="checkbox" id="curtain1"><span class="knob"></span></label>
+      </div>
+      <div class="curtain">
+        <div class="stat-strip">
+          <div class="stat"><div class="n">13M vs 11M</div><div class="d">Bot accounts outnumbered real humans on Papaya's apps (2021–24)</div></div>
+          <div class="stat"><div class="n">~70%</div><div class="d">of $6.7B in advertised prizes never reached a human — bots "won" them</div></div>
+          <div class="stat"><div class="n">$719M</div><div class="d">Ordered against Papaya Gaming for false advertising (federal court, July 2026)</div></div>
+          <div class="stat"><div class="n">$0</div><div class="d">What a bot "pays" to enter — every bot seat is pure margin</div></div>
+        </div>
+        <div class="note warn"><b>AviaGames admits this in its own FAQ</b> <span class="tag doc">DOCUMENTED</span><br>
+        New players get free "Trial Bonus Cash" in Starter Matches — and paying players "may be matched with a Starter Matches player who is paying the entry fee with Trial Bonus Cash." Translation: <b>your real money vs. their free promo cash.</b></div>
+        <div class="note"><b>On Bingo Winner specifically</b> <span class="tag rep">PLAYERS REPORT</span><br>
+        Reviewers describe the same loop: easy early wins, then "as soon as I deposit money… I lost all your money," and numbers that stop being called on bigger deposits. Not proven in court — but it's the #1 pattern across 73 complaints (avg 1.6★ on a complaint site; the App Store shows ~4.8★, and one reviewer notes the app asks for a rating <i>right after you win</i>).</div>
+      </div>
+    </div>
+  </div>
+  <p class="small">Why bots exist: instant matches, 24/7, with zero payout cost — and full control over who "wins" the prize pool. Skillz's own CEO called competitors' bot play <i>"worse than gambling. It's rigged gambling."</i></p>
+</section>
+
+<!-- ============ 2 THE HOOK ============ -->
+<section class="block" id="hook">
+  <div class="eyebrow">Act 2 · The Hook</div>
+  <h2>The five-step playbook</h2>
+  <p class="lede">This is the onboarding funnel nearly every skill-casino app runs. Each step has two stories: what you feel, and what's designed.</p>
+
+  <div class="card">
+    <h3>1 · Free credits land <span class="tag doc">DOCUMENTED</span></h3>
+    <p class="muted" style="font-size:14px">Lucky Wheel spins, "Starter Matches" trial cash, free gifts for inviting friends.</p>
+    <div class="feel-vs"><div class="feel"><b>You feel</b>They're generous. It's free — why not?</div>
+    <div class="real"><b>Designed to</b>Teach the loop with zero risk; build a balance that sits <i>just below</i> the cash-out minimum; create reciprocity — "they gave me $10, I should at least play."</div></div>
+  </div>
+  <div class="card">
+    <h3>2 · Your first wins feel easy <span class="tag rep">PLAYERS REPORT</span></h3>
+    <p class="muted" style="font-size:14px">Early matches feel winnable. Opponents mark their cards slowly. You place 1st or 2nd.</p>
+    <div class="feel-vs"><div class="feel"><b>You feel</b>I'm actually good at this. I could win real money.</div>
+    <div class="real"><b>Designed to</b>Soft matchmaking for new accounts builds confidence — confidence converts to a first deposit. Reviewers across apps report the wins drying up the moment real money goes in.</div></div>
+  </div>
+  <div class="card">
+    <h3>3 · The deposit bundle <span class="tag doc">DOCUMENTED</span></h3>
+    <p class="muted" style="font-size:14px">Papaya's real offer: deposit $5 → get $5 cash + $2.50 <i>bonus</i> cash + 100 diamonds, marketed as "50% more value."</p>
+    <div class="feel-vs"><div class="feel"><b>You feel</b>Free money! I'd be dumb not to take it.</div>
+    <div class="real"><b>Designed to</b>Bonus cash <b>can't be withdrawn</b>, is <b>spent first</b>, and is <b>forfeited if you withdraw</b>. The "gift" is a leash: cashing out means deleting part of your balance.</div></div>
+  </div>
+  <div class="card">
+    <h3>4 · The spike <span class="tag rep">PLAYERS REPORT</span></h3>
+    <p class="muted" style="font-size:14px">Bingo Winner reviewers: "Whenever I deposit large sums my numbers are not called." Wins turn into near-misses.</p>
+    <div class="feel-vs"><div class="feel"><b>You feel</b>Bad luck streak. My skill didn't change… did it?</div>
+    <div class="real"><b>Designed to</b>Losses are the trigger for step 5. Whether it's tuned difficulty or variance, the <i>response</i> is engineered: the losing streak is when the offers arrive.</div></div>
+  </div>
+  <div class="card">
+    <h3>5 · The rescue offer <span class="tag doc">DOCUMENTED</span> <span class="tag pat">INDUSTRY PATTERN</span></h3>
+    <p class="muted" style="font-size:14px">Skillz's SEC filing discloses "systematic calls to end-user action via push notifications… promotional offers, and time-sensitive actions." Industry CRM data: loss rebates of 10–25% target the first-deposit window to drive the <i>second</i> deposit; high-value players are 60–70% of revenue.</p>
+    <div class="feel-vs"><div class="feel"><b>You feel</b>They noticed me. They care. One more try?</div>
+    <div class="real"><b>Designed to</b>The offer lands at peak loss-chasing — right after a bad streak, when your balance is empty and your judgment is weakest. The loop restarts at step 3.</div></div>
+  </div>
+</section>
+
+<!-- ============ 3 MONEY DRAIN GAME ============ -->
+<section class="block" id="money">
+  <div class="eyebrow">Act 3 · The Money Drain</div>
+  <h2>Play five rounds. Watch your wallet.</h2>
+  <p class="lede">A transparent simulator. Every number is shown: entry fees, the house rake (16–20% is what Skillz discloses), and the two-balance trick. <b>How to play:</b> a regulation 5×5 bingo card — <b>B&nbsp;I&nbsp;N&nbsp;G&nbsp;O</b> across the top, FREE in the middle. When a called ball matches one on your card, <b>tap it on your card</b> to mark it.</p>
+
+  <div class="card" id="gameCard">
+    <div class="speed-row">
+      <span>⏱ <b>Ball-call speed</b> <span class="muted">— the real apps call far faster than this. Applies to the next round.</span></span>
+      <div class="btn-row speed-btns">
+        <button class="btn ghost speed-btn active" data-ms="4000">🐢 4s</button>
+        <button class="btn ghost speed-btn" data-ms="1000">⚡ 1s</button>
+        <button class="btn ghost speed-btn" data-ms="0">🚀 Instant</button>
+      </div>
+    </div>
+    <!-- setup -->
+    <div id="gSetup">
+      <p style="font-size:14px" class="muted">Start with a <b style="color:var(--text)">$20 deposit</b>. The app "gifts" you <b style="color:var(--gold)">$5 bonus cash</b>. Looks generous. Remember Act 2, step 3.</p>
+      <button class="btn" id="depositBtn">💳 Deposit $20 &amp; claim $5 bonus</button>
+    </div>
+    <!-- HUD -->
+    <div id="gHud" style="display:none">
+      <div class="ledger">
+        <div class="bal real"><span>💵 Real cash</span><b id="balReal">$0.00</b><small>withdrawable</small></div>
+        <div class="bal bonus"><span>🎟️ Bonus cash</span><b id="balBonus">$0.00</b><small>can't withdraw · spent first</small></div>
+      </div>
+      <div class="rake-row"><span>🏦 House rake taken from you so far</span><b id="rakeAmt">$0.00</b></div>
+      <div id="roundLabel" class="round-label">Round 1 of 5</div>
+      <div id="gMsg" class="gmsg">Tap <b>Play round</b> — entry is $2.20.</div>
+      <div id="oppLine" class="small" style="text-align:center;margin:6px 0"></div>
+      <div id="bingoArea" style="display:none">
+        <div class="called">Ball: <b id="calledNum">–</b></div>
+        <button class="btn ghost" id="soundBtn" style="padding:9px;font-size:13px;margin-bottom:4px">🔊 Caller voice: ON</button>
+        <div class="bingo-grid" id="bingoGrid"></div>
+      </div>
+      <div class="btn-row" id="roundBtns">
+        <button class="btn" id="playBtn">▶ Play round ($2.20)</button>
+      </div>
+      <div class="btn-row" id="afterBtns" style="display:none">
+        <button class="btn" id="nextBtn">▶ Next round</button>
+        <button class="btn ghost" id="cashBtn">💰 Cash out now</button>
+      </div>
+      <div id="offerCard" class="offer" style="display:none">
+        <b>📩 Special offer just for you!</b>
+        <p>Deposit <b>$5</b> → get <b>$5 + $2.50 BONUS cash</b> + 100 diamonds!</p>
+        <div class="btn-row"><button class="btn" id="offerYes">Take it</button><button class="btn ghost" id="offerNo">No thanks</button></div>
+        <p class="curtain-note">🎭 <i>Timed offer after your losing streak. Bonus cash can't be withdrawn — it's bait, not money.</i></p>
+      </div>
+      <div id="pushCard" class="offer push" style="display:none">
+        <b>🔔 Push notification</b>
+        <p>"We miss you! Here's <b>$3 BONUS cash</b> — expires in 2 hours! ⏰"</p>
+        <button class="btn" id="pushBtn">Claim $3 bonus</button>
+        <p class="curtain-note">🎭 <i>Sent because your balance hit zero and you stopped playing. Expiry forces "play by appointment."</i></p>
+      </div>
+    </div>
+    <!-- withdrawal -->
+    <div id="gWithdraw" style="display:none">
+      <h3>💸 The withdrawal gauntlet</h3>
+      <div class="wd-row"><span>Withdrawable (real cash)</span><b id="wdReal">$0.00</b></div>
+      <div class="wd-row strike"><span>Bonus cash</span><b id="wdBonus">$0.00 → $0.00</b></div>
+      <p class="curtain-note">🎭 <i>Withdrawing <b>forfeits all bonus cash</b> — documented policy at Papaya, AviaGames &amp; Big Cash Bingo. Their stated reason: to stop you depositing, grabbing the bonus, and withdrawing.</i></p>
+      <div id="wdFriction"></div>
+      <button class="btn" id="wdBtn">Withdraw</button>
+      <div id="wdDone" style="display:none"></div>
+      <div class="btn-row"><button class="btn ghost" id="againBtn">↻ Run it again</button></div>
+    </div>
+  </div>
+  <div class="note"><b>The two-balance trick, plainly:</b> bonus cash is spent <i>first</i> on entries, can't be withdrawn, and vanishes if you cash out — so withdrawing always feels like losing money. That's not an accident; it's the retention mechanism. <span class="tag doc">DOCUMENTED</span></div>
+  <div class="note warn"><b>Who are you trusting?</b> Bingo Winner's developer, JoyBox Studio Limited, lists support as a generic Gmail (<span class="small">bingowinner777@gmail.com</span>) — no company domain, no phone. Opaque operators + your bank details = think twice. <span class="tag doc">DOCUMENTED</span></div>
+</section>
+
+<style>
+/* game widgets */
+.ledger{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px}
+.bal{border-radius:12px;padding:10px 12px;border:1px solid var(--line)}
+.bal span{font-size:12px;color:var(--muted);display:block}
+.bal b{font-size:20px}
+.bal small{display:block;font-size:10.5px;color:var(--faint)}
+.bal.real{background:rgba(95,217,122,.07);border-color:rgba(95,217,122,.35)} .bal.real b{color:var(--green)}
+.bal.bonus{background:rgba(245,185,66,.07);border-color:rgba(245,185,66,.35)} .bal.bonus b{color:var(--gold)}
+.rake-row{display:flex;justify-content:space-between;align-items:center;font-size:13px;color:var(--muted);
+  background:var(--card2);border:1px solid var(--line);border-radius:10px;padding:8px 12px;margin-bottom:10px}
+.rake-row b{color:var(--red);font-size:16px}
+.round-label{text-align:center;font-size:12px;font-weight:800;letter-spacing:2px;color:var(--faint);margin:4px 0}
+.speed-row{margin:2px 0 12px}
+.speed-row>span{font-size:13px;display:block;margin-bottom:8px;text-align:center}
+.speed-btn{font-size:13px;padding:10px 4px}
+.speed-btn.active{border-color:var(--gold);color:var(--gold)}
+.gmsg{background:var(--card2);border:1px solid var(--line);border-radius:12px;padding:12px;font-size:14px;margin:8px 0;min-height:48px}
+.called{text-align:center;font-size:15px;color:var(--muted);margin:8px 0}
+.called b{display:inline-block;font-size:20px;color:var(--gold);background:var(--card2);
+  border:1px solid var(--gold);border-radius:999px;min-width:64px;padding:0 14px;height:52px;line-height:50px}
+.bl{display:block;font-size:10px;letter-spacing:2px;color:var(--faint);font-weight:800;line-height:1.2}
+.bingo-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:10px 0}
+.cell{background:var(--card2);border:1px solid var(--line);border-radius:12px;padding:14px 0;text-align:center;
+  font-size:20px;font-weight:800;cursor:pointer;user-select:none;-webkit-tap-highlight-color:transparent}
+.cell.hit{background:rgba(79,209,197,.18);border-color:var(--teal);color:var(--teal);text-decoration:line-through}
+.cell.target{animation:pulse .6s infinite;border-color:var(--gold);box-shadow:0 0 0 2px rgba(245,185,66,.45)}
+@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.08)}}
+.bingo-grid.five{grid-template-columns:repeat(5,1fr);max-width:350px;gap:6px}
+.bingo-grid.five .cell{font-size:16px;padding:10px 0}
+.bhead{background:var(--teal);color:#06181a;font-weight:800;border-radius:10px;padding:10px 0;text-align:center;font-size:18px;letter-spacing:2px}
+.cell.free{background:rgba(245,185,66,.14);border-color:var(--gold);color:var(--gold);font-size:11px;cursor:default}
+.cell.free .bl{color:var(--gold)}
+.offer{background:rgba(245,185,66,.08);border:1px dashed var(--gold);border-radius:14px;padding:14px;margin-top:12px}
+.offer.push{background:rgba(110,168,255,.07);border-color:var(--blue)}
+.offer p{font-size:14px;margin:8px 0}
+.curtain-note{font-size:12.5px;color:var(--teal);margin:8px 0 0}
+.wd-row{display:flex;justify-content:space-between;font-size:15px;padding:8px 0;border-bottom:1px solid var(--line)}
+.wd-row.strike span,.wd-row.strike b{color:var(--faint);text-decoration:line-through}
+/* near-miss lab */
+.tally{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin:12px 0}
+.tally .t{background:var(--card2);border:1px solid var(--line);border-radius:12px;padding:12px 6px;text-align:center}
+.tally .t b{display:block;font-size:26px}
+.tally .t span{font-size:11.5px;color:var(--muted)}
+.tally .t.win b{color:var(--green)} .tally .t.near b{color:var(--gold)} .tally .t.loss b{color:var(--red)}
+.bar{height:10px;border-radius:99px;background:var(--line);overflow:hidden;margin-top:6px}
+.bar i{display:block;height:100%;border-radius:99px;transition:width .3s}
+.bar.win i{background:var(--green)} .bar.near i{background:var(--gold)} .bar.loss i{background:var(--red)}
+/* sliders */
+.slider-row{margin:14px 0}
+.slider-row label{display:flex;justify-content:space-between;font-size:14px;font-weight:600;margin-bottom:6px}
+.slider-row label output{color:var(--gold)}
+input[type=range]{width:100%;accent-color:var(--gold);height:32px}
+.risk-meter{height:16px;border-radius:99px;background:var(--line);overflow:hidden;margin:8px 0}
+.risk-meter i{display:block;height:100%;width:0;border-radius:99px;background:linear-gradient(90deg,var(--green),var(--gold),var(--red));transition:width .3s}
+/* checklist */
+.check{display:flex;gap:10px;align-items:flex-start;background:var(--card2);border:1px solid var(--line);
+  border-radius:12px;padding:10px 12px;margin-bottom:8px;font-size:14px;cursor:pointer}
+.check input{width:20px;height:20px;margin-top:2px;accent-color:var(--red);flex:0 0 auto}
+.help-card{background:linear-gradient(135deg,rgba(79,209,197,.12),rgba(55,168,240,.08));
+  border:1px solid var(--teal);border-radius:16px;padding:18px;text-align:center;margin-bottom:14px}
+.help-card .big{font-size:26px;font-weight:800;color:var(--teal);letter-spacing:.5px}
+.tool-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.tool{background:var(--card2);border:1px solid var(--line);border-radius:12px;padding:12px;font-size:13px}
+.tool b{display:block;margin-bottom:4px;font-size:14px}
+.sources a{display:block;font-size:12.5px;word-break:break-all;margin-bottom:8px;color:var(--teal);text-decoration:none}
+.sources h4{font-size:13px;color:var(--muted);margin:14px 0 6px;text-transform:uppercase;letter-spacing:1px}
+.reels{display:flex;gap:10px;justify-content:center;margin:14px 0 6px}
+.reel{width:74px;height:94px;background:var(--card2);border:1px solid var(--line);border-radius:14px;
+  display:flex;align-items:center;justify-content:center;font-size:42px}
+.reel.spin{filter:blur(3px) brightness(1.25)}
+.reel.win{border-color:var(--gold);box-shadow:0 0 0 2px rgba(245,185,66,.4)}
+footer{padding:26px 0 40px;text-align:center;color:var(--faint);font-size:12.5px}
+.listen-btn{display:inline-flex;align-items:center;gap:6px;background:rgba(79,209,197,.07);
+  border:1px solid var(--line);color:var(--muted);border-radius:999px;
+  font-size:12px;font-weight:700;padding:6px 12px;cursor:pointer;margin:0 0 10px;touch-action:manipulation}
+.listen-btn.playing{color:var(--teal);border-color:var(--teal)}
+/* ===== flashy ===== */
+.hero h1{background:linear-gradient(100deg,#f5b942,#ff6b9d,#4fd1c5,#f5b942);background-size:300% auto;
+  -webkit-background-clip:text;background-clip:text;color:transparent;animation:hshine 7s linear infinite}
+@keyframes hshine{to{background-position:300% center}}
+.bigbtn{animation:glowpulse 2.2s infinite}
+@keyframes glowpulse{0%,100%{box-shadow:0 6px 18px rgba(245,185,66,.30)}50%{box-shadow:0 6px 34px rgba(245,185,66,.65)}}
+.btn.gold{position:relative;overflow:hidden}
+.btn.gold::after{content:"";position:absolute;top:0;left:-70%;width:45%;height:100%;pointer-events:none;
+  background:linear-gradient(100deg,transparent,rgba(255,255,255,.45),transparent);transform:skewX(-20deg);animation:sheen 3.4s infinite}
+@keyframes sheen{0%{left:-70%}55%,100%{left:140%}}
+/* ===== iphone simulator ===== */
+.phone-wrap{display:flex;justify-content:center;margin:18px 0 8px}
+.iphone{width:min(360px,94vw);aspect-ratio:9/19.2;background:#0b0d12;border-radius:48px;padding:12px;
+  box-shadow:0 0 0 2px #2a2f3a,0 24px 60px rgba(0,0,0,.6),0 0 44px rgba(79,209,197,.12);
+  position:relative;display:flex;flex-direction:column}
+.pscreen{background:linear-gradient(160deg,#1b2a6b,#0d1b3e 45%,#3b0f4f);border-radius:38px;overflow:hidden;
+  position:relative;flex:1;min-height:0;display:flex;flex-direction:column}
+.pnotch{position:absolute;top:22px;left:50%;transform:translateX(-50%);width:110px;height:28px;background:#05070b;border-radius:16px;z-index:30}
+.pstatus{display:flex;justify-content:space-between;align-items:center;padding:16px 28px 6px;color:#fff;font-size:13px;font-weight:700;z-index:31}
+.phome{flex:1;display:flex;flex-direction:column;padding:16px 14px 10px;position:relative;z-index:1;min-height:0}
+.pgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:18px 8px;align-content:start}
+.papp{background:none;border:none;font-family:inherit;display:flex;flex-direction:column;align-items:center;gap:5px;cursor:pointer;position:relative;color:#fff;padding:0}
+.picon{width:56px;height:56px;border-radius:15px;display:flex;align-items:center;justify-content:center;font-size:30px;box-shadow:0 4px 10px rgba(0,0,0,.35)}
+.papp.flash .picon{animation:iconwiggle 1.6s ease-in-out infinite}
+@keyframes iconwiggle{0%,100%{transform:rotate(-4deg) scale(1)}50%{transform:rotate(4deg) scale(1.08)}}
+.plabel{font-size:11px}
+.pbadge{position:absolute;top:-5px;right:6px;background:#ff3b30;color:#fff;font-size:11px;font-weight:800;min-width:20px;height:20px;border-radius:10px;display:flex;align-items:center;justify-content:center;padding:0 5px;z-index:2}
+.pdock{margin-top:auto;background:rgba(255,255,255,.16);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-radius:24px;display:flex;justify-content:space-around;padding:10px 6px}
+.phomebar{width:120px;height:5px;background:rgba(255,255,255,.85);border-radius:3px;margin:9px auto 7px;flex:none}
+.pnotifs{position:absolute;top:0;left:0;right:0;z-index:40;display:flex;flex-direction:column;gap:8px;padding:56px 10px 0;pointer-events:none}
+.pnotif{pointer-events:auto;display:flex;gap:10px;align-items:center;background:rgba(28,30,40,.85);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+  border-radius:18px;padding:10px 12px;color:#fff;text-align:left;border:1px solid rgba(255,255,255,.12);font-family:inherit;
+  animation:notifIn .45s cubic-bezier(.2,1.4,.4,1);cursor:pointer;width:100%}
+@keyframes notifIn{from{transform:translateY(-130%);opacity:0}}
+.pnotif.out{transition:.35s;transform:translateY(-130%);opacity:0}
+.pnicon{font-size:26px;flex:none}
+.pntext{display:flex;flex-direction:column;font-size:12.5px;flex:1;min-width:0}
+.pntext b{font-size:12.5px}
+.pntext span{color:#c9ccd6}
+.pntime{font-size:11px;color:#9aa0ae;align-self:flex-start;flex:none}
+.pmail{flex:1;background:#f2f2f7;color:#111;display:flex;flex-direction:column;z-index:20;position:relative;min-height:0}
+.pnavbar{display:flex;align-items:center;justify-content:space-between;padding:12px;background:rgba(255,255,255,.9);border-bottom:1px solid #ddd;font-size:15px;flex:none}
+.pback{background:none;border:none;color:#007aff;font-size:22px;cursor:pointer;font-family:inherit;padding:0 4px}
+.pemail{padding:12px;border-bottom:1px solid #e3e3e8;display:flex;flex-direction:column;gap:2px;cursor:pointer;background:#fff}
+.pemail b{font-size:14px}.pemail span{font-size:13px;color:#555}.pemail i{font-size:11px;color:#999;font-style:normal}
+.pmailbody{padding:16px 14px;overflow-y:auto;background:#fff;flex:1}
+.pmailhead{display:flex;gap:10px;align-items:center;margin-bottom:10px}
+.pavatar{width:42px;height:42px;border-radius:50%;background:linear-gradient(135deg,#f5b942,#e11d48);display:flex;align-items:center;justify-content:center;font-size:22px;flex:none}
+.pmailhead>div{display:flex;flex-direction:column}.pmailhead span{font-size:12px;color:#777}
+.pmailbody h3{font-size:19px;margin:6px 0;color:#111}
+.pmailbody p{font-size:14px;color:#333;margin:8px 0}
+.pfine{font-size:11.5px!important;color:#999!important}
+.ptoast{position:absolute;bottom:74px;left:50%;transform:translateX(-50%) translateY(20px);background:rgba(20,22,30,.93);color:#fff;
+  padding:10px 16px;border-radius:14px;font-size:13px;opacity:0;transition:.3s;z-index:60;pointer-events:none;white-space:nowrap;max-width:92%}
+.ptoast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+/* ===== splash ===== */
+#splash{position:fixed;inset:0;z-index:9000;display:flex;align-items:center;justify-content:center;
+  background:radial-gradient(circle at 50% 28%,#3b1163,#12041f 72%);overflow:hidden}
+.splash-inner{text-align:center;position:relative;padding:24px;max-width:92vw}
+.splash-balls{margin-bottom:6px}
+.splash-balls span{display:inline-block;font-size:46px;margin:0 8px;animation:bbounce 1s infinite}
+.splash-balls span:nth-child(2){animation-delay:.15s}.splash-balls span:nth-child(3){animation-delay:.3s}
+@keyframes bbounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-24px)}}
+.splash-logo{font-size:64px;font-weight:900;line-height:1.05;letter-spacing:2px;margin:14px 0 8px;
+  background:linear-gradient(100deg,#f5b942 20%,#fff 42%,#f5b942 62%);background-size:220% auto;
+  -webkit-background-clip:text;background-clip:text;color:transparent;animation:hshine 2.4s linear infinite}
+.splash-sub{color:#c9a6ff;font-size:14px;margin-bottom:28px}
+.splash-note{color:#8f96ad;font-size:12.5px;margin-top:14px}
+#gtoast{position:fixed;bottom:26px;left:50%;transform:translateX(-50%) translateY(20px);background:rgba(20,22,30,.94);
+  color:#fff;padding:12px 18px;border-radius:16px;font-size:14px;opacity:0;transition:.35s;z-index:9500;pointer-events:none;max-width:92vw;text-align:center}
+#gtoast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+#musicBtn{position:fixed;right:14px;bottom:14px;z-index:9400;width:50px;height:50px;border-radius:50%;
+  background:var(--card2);border:1px solid var(--line);font-size:23px;cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,.4)}
+.rsym{width:72%;height:72%;object-fit:contain;pointer-events:none}
+.piconimg{width:100%;height:100%;object-fit:cover;border-radius:15px;display:block}
+</style>
+
+<!-- ============ 4 NEAR-MISS LAB ============ -->
+<section class="block" id="nearmiss">
+  <div class="eyebrow">Act 4 · The Near-Miss Lab</div>
+  <h2>"One number away" is still $0</h2>
+  <p class="lede">"So close! Your strategy is working — one more game?" Run 20 instant rounds and watch how often the game lands you <i>juuust</i> short of winning.</p>
+  <div class="card">
+    <div class="tally">
+      <div class="t win"><b id="tWin">0</b><span>Wins 💰</span><div class="bar win"><i id="bWin" style="width:0"></i></div></div>
+      <div class="t near"><b id="tNear">0</b><span>One-away 😤</span><div class="bar near"><i id="bNear" style="width:0"></i></div></div>
+      <div class="t loss"><b id="tLoss">0</b><span>Clear losses</span><div class="bar loss"><i id="bLoss" style="width:0"></i></div></div>
+    </div>
+    <button class="btn ghost" id="simBtn">🎰 Simulate 20 rounds</button>
+    <p class="small" id="simMsg" style="margin-top:10px"></p>
+  </div>
+  <div class="note"><b>The neuroscience:</b> near-misses fire the same dopamine reward pathways as actual wins (Chase &amp; Clark, <i>Journal of Neuroscience</i>, 2010) — even though they pay nothing. Skill-bingo makes it sharper than slots: the near-miss gets reframed as <i>skill feedback</i> ("your strategy was nearly optimal"), so you blame luck, not the design, and press harder. <span class="tag doc">DOCUMENTED</span></div>
+  <div class="note warn"><b>They monetize the feeling directly:</b> real-money bingo products sell "extra balls" priced by <i>how close you are to winning</i> — the nearer the miss, the higher the price. <span class="tag pat">INDUSTRY PATTERN</span></div>
+</section>
+
+<!-- ============ 5 FREE CREDIT RADAR ============ -->
+<section class="block" id="credits">
+  <div class="eyebrow">Act 5 · Free-Credit Radar</div>
+  <h2>They know when you'll play</h2>
+  <p class="lede">Free credits aren't random kindness — they're timed to churn-risk signals. Move the sliders to match a player profile and see which offer the system fires, and why.</p>
+  <div class="card">
+    <div class="slider-row"><label>Hours since last played <output id="oHours">30h</output></label>
+      <input type="range" id="sHours" min="0" max="168" value="30"></div>
+    <div class="slider-row"><label>Current balance <output id="oBal">$4.10</output></label>
+      <input type="range" id="sBal" min="0" max="50" step="0.1" value="4.1"></div>
+    <div class="slider-row"><label>Losses in a row <output id="oLoss">3</output></label>
+      <input type="range" id="sLoss" min="0" max="10" value="3"></div>
+    <p class="small" style="margin:6px 0 2px">Computed churn risk</p>
+    <div class="risk-meter"><i id="riskBar"></i></div>
+    <div class="gmsg" id="offerOut" style="margin-top:12px"></div>
+  </div>
+  <div class="note"><b>Why it works:</b> ~90-second rounds create rapid reward loops; time-limited credits force "play by appointment"; push offers arrive at peak loss-chasing. Skillz discloses "systematic" push-notification marketing in its SEC filing. The academic name for this stack is <i>dark patterns</i> — temporal, monetary and social designs that keep you playing "frequently at the expense of user satisfaction" (Zagal et al., 2013). <span class="tag doc">DOCUMENTED</span></div>
+</section>
+
+<!-- ============ 6 HELP ============ -->
+<section class="block" id="help">
+  <div class="eyebrow">Act 6 · Get Help</div>
+  <h2>If this page feels personal</h2>
+  <p class="lede">Check any that sound familiar. No data leaves your phone — this is just for you.</p>
+  <div class="card">
+    <div id="warnList"></div>
+    <p class="small" id="warnMsg" style="margin-top:8px"></p>
+  </div>
+  <div class="help-card">
+    <div style="font-size:13px;color:var(--muted);margin-bottom:6px">NCPG NATIONAL PROBLEM GAMBLING HELPLINE · FREE · CONFIDENTIAL · 24/7</div>
+    <div class="big">1-800-522-4700</div>
+    <div style="font-size:14px;margin-top:8px">Call <b>1-800-522-4700</b> · text <b>800GAM</b> · chat at <a href="https://www.ncpgambling.org/chat">ncpgambling.org/chat</a></div>
+    <div style="font-size:12px;color:var(--muted);margin-top:10px"><b>1-800-GAMBLER</b> still works — it is now run by New Jersey's Council on Compulsive Gambling, not the NCPG.</div>
+  </div>
+  <h3 style="margin:18px 0 10px">What actually helps <span class="tag doc">DOCUMENTED</span></h3>
+  <div class="tool-grid">
+    <div class="tool"><b>🧮 Know the rake</b>16–20¢ of every $1 in entries goes to the house before prizes. "Winning" players are still paying for entertainment.</div>
+    <div class="tool"><b>🎟️ Bonus-cash literacy</b>Bonus cash can't be withdrawn and dies if you cash out. It's not money — it's a coupon that keeps you seated.</div>
+    <div class="tool"><b>🎯 Near-miss literacy</b>"One away" pays $0 and your brain treats it like progress. Name it when it happens: <i>that's the trick working.</i></div>
+    <div class="tool"><b>⏸️ Interruptions &amp; limits</b>Pop-up breaks and preset deposit limits measurably shift behavior (Bjørseth et al., 2021). Set them <i>before</i> you play, not during.</div>
+  </div>
+  <div class="note" style="margin-top:14px"><b>The sunk-cost escape:</b> money already inside the app gets mentally filed as "gambling money" — which makes it easy to keep spending (Gainsbury, behavioural economics of gambling). Withdrawing converts it back into <i>real</i> money in your head. That's why cashing out feels hard — and why it's the strongest move.</div>
+</section>
+
+<!-- ============ ACT 7 · SLOTS ============ -->
+<section class="block" id="slots">
+  <div class="kicker">Act 7 · The Slot Floor</div>
+  <h2>Bingo is the bonus round. <i>Slots</i> are the game.</h2>
+  <p class="lede">In these apps the slot floor is the main event — fast, loud, one tap away, always. The bingo game from Act 3? In the real product it usually lives <i>inside</i> the slots, as the <b>bonus round where "winnings" get cashed out</b>. Same playbook, faster drain.</p>
+
+  <div class="card">
+    <span class="chip ind">INDUSTRY PATTERN</span>
+    <h3>How the machine actually works</h3>
+    <ul class="plain">
+      <li>🎰 <b>The outcome is decided the instant you tap.</b> A random number generator picks the result in milliseconds — the spinning reels are a cartoon of a decision already made.</li>
+      <li>📉 <b>RTP (return to player)</b> is the share of wagers the machine is programmed to return over time — often 85–98% on real-money slots. This demo is tuned to 93%: every $1 spin costs you <b>7¢ on average</b>. The machine doesn't need to cheat; the math is the cheat. And the 93% <i>includes</i> the rare jackpots and bonus rounds — those 1.6% of spins carry a third of all returns, while the other 98.4% of spins give back about <b>61¢ on the dollar</b>.</li>
+      <li>🎺 <b>Losses disguised as wins:</b> bet $1.00, "win" $0.50 — and the machine throws a parade anyway. Your brain logs a win; your wallet lost 50¢.</li>
+      <li>😱 <b>Near misses are programmed in.</b> Two jackpot symbols with the third just above the line isn't luck — the virtual reels are weighted to show "almost" far more often than chance would.</li>
+      <li>⚡ <b>Speed is the product.</b> A spin every few seconds means hundreds of wagers an hour. No other casino game separates a player from money this efficiently.</li>
+      <li>🪙 <b>Coins, not dollars.</b> Balances show in coins or credits to put distance between tapping and spending. The coin <i>packs</i> cost real dollars.</li>
+    </ul>
+  </div>
+
+  <div class="card" id="slotCard">
+    <span class="chip ind">INDUSTRY PATTERN</span>
+    <h3>🎰 Try it: the one-armed drain</h3>
+    <p class="muted" style="font-size:13.5px">$20 of free credits. $1.00 a spin. 93% RTP — the standard recipe, bonus-round prizes included like the real machines. Watch the ledger, not the lights.</p>
+    <div class="ledger">
+      <div><span>Credits</span><b id="slBal" class="teal">$20.00</b></div>
+      <div><span>Spins</span><b id="slSpins">0</b></div>
+      <div><span>Wagered</span><b id="slWag">$0.00</b></div>
+      <div><span>Returned</span><b id="slRet" class="teal">$0.00</b></div>
+      <div><span>Real $ spent</span><b id="slReal" class="gold">$0.00</b></div>
+    </div>
+    <div class="reels">
+      <div class="reel" id="reel0" data-sym="🍒">🍒</div>
+      <div class="reel" id="reel1" data-sym="🍋">🍋</div>
+      <div class="reel" id="reel2" data-sym="🔔">🔔</div>
+    </div>
+    <div id="slotMsg" class="gmsg">Tap SPIN — each spin costs $1.00 of free credits.</div>
+    <button class="btn gold bigbtn" id="spinBtn">SPIN · $1.00</button>
+    <button class="btn ghost" id="truthBtn" style="margin-top:8px;font-size:13px">🎭 Skip the theater: reveal outcomes instantly</button>
+    <button class="btn ghost" id="slotReset" style="display:none;margin-top:8px">↻ Reset the slot demo</button>
+    <div id="coinOffer" class="card offer" style="display:none;margin-top:12px">
+      <b>🪙 Out of credits!</b>
+      <p class="muted" style="font-size:13px">The machine goes quiet. The store gets loud.</p>
+      <button class="btn gold" id="buyCoins">Coin pack · $4.99 → +$20.00 credits <span class="tag">MOST POPULAR</span></button>
+      <button class="btn ghost" id="walkAway" style="margin-top:8px">Walk away instead</button>
+    </div>
+    <div id="bonusPanel" class="card" style="display:none;margin-top:12px;background:rgba(245,185,66,.06);border-color:var(--gold)">
+      <h3 style="margin-top:0">🎁 BONUS: the bingo cash-out round</h3>
+      <p class="muted" style="font-size:13.5px">This is the Act 3 game — living <i>here</i>, as the prize gate. Your prize was decided the instant the bonus triggered: <b class="gold" id="bonusPrize">$0.00</b>. The bingo card is the reveal ceremony, not the decider.</p>
+      <div class="bingo-grid" id="bonusGrid" style="max-width:250px"></div>
+      <div id="bonusMsg" class="gmsg"></div>
+      <button class="btn gold" id="cashoutBtn" style="display:none">💰 CASH OUT</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <span class="chip ind">INDUSTRY PATTERN</span>
+    <h3>So where does bingo fit in?</h3>
+    <ol class="plain">
+      <li>Slots drain credits fast — one tap, one wager, every few seconds.</li>
+      <li>Wins and near-wins trigger the <b>bingo bonus round</b>. It feels like a separate skill game where you finally "cash out."</li>
+      <li>The bonus prize is <b>predetermined</b>. The bingo card is the envelope, not the letter — try it above: the prize is shown <i>before</i> the first ball is called.</li>
+      <li>Cashing out routes you past the coin store, the withdrawal minimums, and the bonus-cash rules from Act 3.</li>
+    </ol>
+    <p class="muted" style="font-size:13.5px">That's why the bingo round feels fair and winnable: it's the <b>reward ceremony</b>. The business model is the spin button.</p>
+  </div>
+
+  <div class="note"><b>🎓 The one-sentence version:</b> every $1 spin returns 93¢ on average — the missing 7¢ is the price of the lights, the music, and the parade for your 50¢ "win."</div>
+</section>
+
+<!-- ============ SOURCES ============ -->
+<section class="block sources" id="sources">
+  <div class="eyebrow">Receipts</div>
+  <h2>Sources</h2>
+  <h4>Court &amp; regulatory</h4>
+  <a href="https://www.businesswire.com/news/home/20260728653231/en/Federal-Court-Orders-Papaya-Gaming-to-Pay-%24719-Million-to-Skillz-Platform-Inc.-a-FIRY-NYSE-FIRY-Company-Disgorging-Its-Unjust-Profits-From-False-Advertising">Federal court: $719M disgorgement vs Papaya Gaming (July 2026)</a>
+  <a href="https://www.yogonet.com/international/news/2026/04/28/118799-skillz-wins-420-million-verdict-against-papaya-gaming-for-false-advertising">Skillz wins $420M jury verdict vs Papaya (Apr 2026)</a>
+  <a href="https://www.stocktitan.net/sec-filings/SKLZ/10-k-skillz-inc-files-annual-report-3824b554dbbb.html">Skillz 10-K: 16–20% rake; push-notification marketing disclosed</a>
+  <h4>Company-published mechanics</h4>
+  <a href="https://www.aviagames.com/support">AviaGames FAQ: Starter Matches / Trial Bonus Cash matching</a>
+  <a href="https://www.aviagames.com/news/how-to-resolve-withdrawal-issues-on-solitaire-clash">AviaGames: 15% early-withdrawal fee; bonus frozen &amp; cleared</a>
+  <a href="https://luckyday.helpshift.com/hc/en/5-bingo-stars/faq/56-how-do-i-make-a-withdrawal/">Bingo Stars help: $5 min withdrawal, $1 fee, bonus forfeited</a>
+  <a href="https://www.bonus.com/bingo/big-cash/">Big Cash Bingo: why bonus is forfeited on withdrawal</a>
+  <a href="https://appagg.com/ios-games/casual/bingo-winner-win-real-money-35403426.html?hl=en">Bingo Winner (Joybox) app listing: features &amp; fair-play claims</a>
+  <h4>Reviews &amp; independent testing</h4>
+  <a href="https://complain.biz/bingo-winner/">Bingo Winner complaints: post-deposit difficulty, withdrawal blocks</a>
+  <a href="https://myroomismyoffice.com/papaya-bingo-cash-review/">Bingo Cash review: bonus vs withdrawable cash</a>
+  <a href="https://financialbinder.com/papaya-bingo-cash-review/">Papaya review: $5 deposit bundle; realistic outcomes</a>
+  <a href="https://trybeem.com/blog/is-bingo-cash-legit-real-user-review/">Bingo Cash: appeal/bankruptcy context; withdrawal timing</a>
+  <h4>Research</h4>
+  <a href="http://science20.com/news_articles/near_misses_encourage_problem_gambling">Near-misses &amp; problem gambling (Chase &amp; Clark 2010)</a>
+  <a href="https://www.frontiersin.org/journals/psychiatry/articles/10.3389/fpsyt.2020.601800/pdf">Pop-up messages meta-analysis (Bjørseth et al., 2021)</a>
+  <a href="https://link.springer.com/content/pdf/10.1007/s10899-023-10276-1.pdf">Personalized behavioral messages (Auer &amp; Griffiths)</a>
+  <a href="https://www.scitepress.org/Papers/2025/133658/133658.pdf">Dark patterns taxonomy (Zagal et al., 2013)</a>
+  <a href="https://ses.library.usyd.edu.au/bitstream/handle/2123/22051/Gainsbury-%20Behavioural%20economics%20and%20gambling%20-%20preprint.pdf">Behavioural economics &amp; gambling (Gainsbury)</a>
+  <a href="https://www.ncpgambling.org/wp-content/uploads/2026/01/PGAM_Poster_01.pdf">NCPG: problem gambling warning signs</a>
+</section>
+
+</div><!-- /wrap -->
+<footer>
+  <p>Built for education. Not medical, legal, or financial advice.<br>
+  "Players report" claims come from public reviews — self-selected and unverified.<br>
+  If gambling is harming you or someone you love: <b style="color:var(--teal)">1-800-522-4700</b> · text <b style="color:var(--teal)">800GAM</b></p>
+</footer>
+
+<div id="splash" style="display:none">
+  <div class="splash-inner">
+    <div class="splash-balls"><span>🎱</span><span>🎯</span><span>🎰</span></div>
+    <div class="splash-logo">BINGO<br>WINNER</div>
+    <div class="splash-sub">by JoyBox Studio · <i>not actually a game</i></div>
+    <button class="btn gold bigbtn" id="tapToPlay">TAP TO PLAY</button>
+    <div class="splash-note">🔊 sound on for the full experience</div>
+  </div>
+</div>
+<button id="musicBtn" aria-label="Toggle music and sound effects">🎵</button>
+<div id="gtoast"></div>
+
+<script>
+(function(){
+"use strict";
+const $=id=>document.getElementById(id);
+const money=n=>"$"+n.toFixed(2);
+
+/* ---------- ACT 1: matchmaking ---------- */
+const OPPS=[
+ {av:"🦊",nm:"LuckyLisa_88",st:"Lv 14 · 52% win",b:"🤖 BOT-4821",n:"scripted reactions · entry paid $0 · tuned to lose slowly"},
+ {av:"🐼",nm:"BingoBandit",st:"Lv 22 · 61% win",b:"🤖 BOT-7710",n:"plays 24/7 · never withdraws · its 'wins' return to the house"},
+ {av:"🦄",nm:"xX_BingoKing_Xx",st:"Lv 9 · 44% win",b:"🎟️ STARTER MATCH",n:"staking FREE trial cash — you are staking real money (AviaGames FAQ)"},
+ {av:"🐸",nm:"Karen1957",st:"Lv 31 · 49% win",b:"🤖 BOT-3355",n:"reaction delay tuned to your skill ±5% — every match feels 'close'"},
+ {av:"🐯",nm:"Mike_D_42",st:"Lv 17 · 55% win",b:"🧑 REAL PLAYER",n:"maybe. 13M bots vs 11M humans on Papaya — the odds say otherwise"},
+ {av:"🦉",nm:"NightOwl99",st:"Lv 12 · 47% win",b:"🤖 BOT-9082",n:"match found in 0.4s at 3am. Humans sleep. Bots don't."}
+];
+$("findBtn").addEventListener("click",()=>{
+  $("matchIdle").style.display="none";
+  const sp=$("matchSpin"); sp.style.display="block";
+  const QUIPS=[
+    "Searching for worthy opponents…",
+    "Scanning 11 million humans…",
+    "…and 13 million bots",
+    "Polishing bot usernames…",
+    "Assigning your \u2018skill level\u2019…"
+  ];
+  let n=5;
+  const show=()=>{ $("countNum").textContent=n; $("countQuip").textContent=QUIPS[5-n]; };
+  show();
+  const iv=setInterval(()=>{
+    n--;
+    if(n<=0){
+      clearInterval(iv);
+      sp.style.display="none"; $("matchResult").style.display="block";
+      $("oppGrid").innerHTML=OPPS.map(o=>
+        `<div class="opp"><div class="av">${o.av}</div><div class="nm">${o.nm}</div><div class="st">${o.st}</div>`+
+        `<div class="stamp">${o.b}<small>${o.n}</small></div></div>`).join("");
+      $("matchResult").scrollIntoView({behavior:"smooth",block:"nearest"});
+    }else show();
+  },1000);
+});
+$("curtain1").addEventListener("change",e=>{
+  $("matchCard").classList.toggle("curtain-on",e.target.checked);
+});
+
+/* ---------- ACT 3: money drain game ---------- */
+const ENTRY=2.20, RAKE_RATE=0.20, PRIZES=[7,4,3];
+function bingoLetter(n){return n<=15?"B":n<=30?"I":n<=45?"N":n<=60?"G":"O";}
+const OPP_SKILL={1:[2,2,3],2:[3,3,4],3:[4,4,5],4:[4,5,5],5:[5,5,6]};
+const CURTAIN={
+ 1:"🎭 <b>Curtain:</b> soft matchmaking for a fresh depositor — opponents scripted slow. Confidence: installed.",
+ 2:"🎭 <b>Curtain:</b> entry fees drain <b>bonus cash first</b>. Your real $20 is untouched, so it still <i>feels</i> free.",
+ 3:"🎭 <b>Curtain:</b> difficulty up. You finished just outside the prizes — the app says <i>'SO CLOSE! Your strategy is working.'</i> Dopamine: same as a win. Payout: $0.",
+ 4:"🎭 <b>Curtain:</b> full difficulty now. Your balance is sinking — and the 'rescue offer' is being prepared…",
+ 5:"🎭 <b>Curtain:</b> five rounds, and the house took its cut of <i>every single entry</i> — win or lose. That's the business model."
+};
+let S, roundTimer=null, daubTO=null, soundOn=true, callMs=4000;
+document.querySelectorAll(".speed-btn").forEach(b=>b.addEventListener("click",()=>{
+  callMs=+b.dataset.ms;
+  document.querySelectorAll(".speed-btn").forEach(x=>x.classList.toggle("active",x===b));
+}));
+function resetGame(){S={real:0,bonus:0,deposited:0,rake:0,round:0,offered:false,pushDone:false,playing:false};}
+resetGame();
+$("soundBtn").addEventListener("click",()=>{
+  soundOn=!soundOn;
+  $("soundBtn").textContent=soundOn?"🔊 Caller voice: ON":"🔇 Caller voice: OFF";
+  if(!soundOn&&"speechSynthesis" in window){try{speechSynthesis.cancel();}catch(e){}}
+});
+function hud(){
+  $("balReal").textContent=money(S.real); $("balBonus").textContent=money(S.bonus);
+  $("rakeAmt").textContent=money(S.rake);
+  $("roundLabel").textContent=S.round===0?"Ready":"Round "+S.round+" of 5";
+  const afford=(S.real+S.bonus)>=ENTRY;
+  $("playBtn").disabled=!afford||S.playing;
+  if(!afford&&S.round>0&&!S.pushDone){$("gMsg").innerHTML="⚠️ Balance too low for another round… wait for it.";}
+}
+function msg(h){$("gMsg").innerHTML=h;}
+$("depositBtn").addEventListener("click",()=>{
+  S.real=20; S.bonus=5; S.deposited=20;
+  $("gSetup").style.display="none"; $("gHud").style.display="block";
+  msg("Deposited <b>$20 real</b> + <b>$5 bonus</b>. The bonus is spent first and can never be withdrawn — watch the ledger.");
+  hud();
+});
+function payEntry(){
+  let need=ENTRY;
+  const fromB=Math.min(S.bonus,need); S.bonus-=fromB; need-=fromB;
+  S.real-=need; S.rake+=ENTRY*RAKE_RATE;
+}
+function playRound(){
+  if(S.playing) return;
+  if((S.real+S.bonus)<ENTRY){triggerPush();return;}
+  S.playing=true; S.round++;
+  payEntry(); hud();
+  if("speechSynthesis" in window){try{const u=new SpeechSynthesisUtterance(" ");u.volume=0;speechSynthesis.speak(u);}catch(e){}}
+  $("roundBtns").style.display="none"; $("afterBtns").style.display="none";
+  $("bingoArea").style.display="block";
+  $("oppLine").textContent="⚡ Match found instantly — 7 opponents waiting. (How? See Act 1.)";
+  // card: 9 unique numbers 1..15
+  const COLS=["B","I","N","G","O"];
+  const colNums=COLS.map((L,ci)=>{
+    const lo=ci*15+1;
+    return [...Array(15)].map((_,i)=>lo+i).sort(()=>Math.random()-.5).slice(0,L==="N"?4:5);
+  });
+  const card=colNums.flat(), daubed=new Set();
+  let html=COLS.map(L=>'<div class="bhead">'+L+'</div>').join("");
+  for(let r=0;r<5;r++)for(let c=0;c<5;c++){
+    if(r===2&&c===2){html+='<div class="cell free" data-n="FREE"><span class="bl">★</span>FREE</div>';}
+    else{const n=colNums[c][(c===2&&r>2)?r-1:r];
+      html+='<div class="cell" data-n="'+n+'"><span class="bl">'+COLS[c]+'</span>'+n+'</div>';}
+  }
+  const grid=$("bingoGrid");
+  grid.classList.add("five");
+  grid.innerHTML=html;
+  const balls=[...Array(75)].map((_,i)=>i+1).sort(()=>Math.random()-.5).slice(0,15);
+  if(callMs===0){
+    const hits=balls.filter(b=>card.includes(b)).length;
+    finishRound(hits,card.length);
+    msg($("gMsg").innerHTML+'<br><br>⚡ <i>Instant mode: 15 balls called at once, marked perfectly, zero waiting. The tapping was theater — the math never needed you.</i>');
+    return;
+  }
+  let bi=0, score=0, armedCell=null;
+  msg(`Round ${S.round}: <b>${ENTRY.toFixed(2)}</b> entry paid (${money(ENTRY*RAKE_RATE)} rake). Tap matching numbers right on your card to mark them.`);
+  grid.querySelectorAll(".cell").forEach(c=>{
+    c.onclick=()=>{
+      const n=+c.dataset.n;
+      if(armedCell===n){
+        clearTimeout(daubTO); armedCell=null;
+        c.classList.remove("target"); c.classList.add("hit");
+        daubed.add(n); score++;
+      }else{
+        c.style.transform="translateX(-4px)";setTimeout(()=>c.style.transform="",120);
+      }
+    };
+  });
+  roundTimer=setInterval(()=>{
+    if(bi>=balls.length){clearInterval(roundTimer);finishRound(score,card.length);return;}
+    const b=balls[bi++];
+    const call=bingoLetter(b)+" "+b;
+    $("calledNum").textContent=call;
+    AudioSys.pop();
+    if(soundOn&&"speechSynthesis" in window){
+      try{speechSynthesis.cancel();
+        const u=new SpeechSynthesisUtterance(call);
+        u.rate=0.9;speechSynthesis.speak(u);}catch(e){}
+    }
+    if(card.includes(b)&&!daubed.has(b)){
+      clearTimeout(daubTO);
+      armedCell=b;
+      grid.querySelectorAll(".cell").forEach(c=>c.classList.toggle("target",+c.dataset.n===b));
+      daubTO=setTimeout(()=>{
+        armedCell=null;
+        grid.querySelectorAll(".cell").forEach(c=>c.classList.remove("target"));
+      },3500);
+    }
+  },callMs);
+}
+function finishRound(score,cardSize){
+  clearTimeout(daubTO);
+  $("bingoGrid").querySelectorAll(".cell").forEach(c=>c.classList.remove("target"));
+  const range=OPP_SKILL[S.round]||[8,9,9];
+  const oppScores=[...Array(7)].map(()=>range[Math.floor(Math.random()*range.length)]);
+  const place=1+oppScores.filter(s=>s>score).length;
+  let prize=0;
+  if(place<=3){prize=PRIZES[place-1];S.real+=prize;}
+  S.playing=false;
+  const placeTxt=place===1?"🥇 1st":place===2?"🥈 2nd":place===3?"🥉 3rd":place+"th";
+  let extra="";
+  if(place===4)extra="<br>😤 <b>One mark from 3rd place.</b> One. Away.";
+  msg(`You marked <b>${score}/${cardSize}</b> → finished <b>${placeTxt}</b>${prize?` — won <b>${money(prize)}</b>!`:" — no prize."}${extra}<br><br>${CURTAIN[S.round]||""}`);
+  hud();
+  $("bingoArea").style.display="none";
+  $("roundBtns").style.display="none"; $("afterBtns").style.display="flex";
+  $("nextBtn").style.display=S.round>=5?"none":"block";
+  if(S.round===3&&!S.offered){$("offerCard").style.display="block";}
+  if(S.round>=5){msg($("gMsg").innerHTML+"<br><br>🏁 <b>5 rounds done.</b> Time to try taking your money home.");}
+}
+$("playBtn").addEventListener("click",playRound);
+$("nextBtn").addEventListener("click",()=>{
+  $("afterBtns").style.display="none"; $("roundBtns").style.display="flex"; playRound();
+});
+$("cashBtn").addEventListener("click",showWithdraw);
+$("offerYes").addEventListener("click",()=>{
+  S.real+=5;S.bonus+=2.5;S.deposited+=5;S.offered=true;
+  $("offerCard").style.display="none";hud();
+  msg("Offer accepted: <b>+$5 real, +$2.50 bonus</b>. 🎭 <i>The bonus still can't be withdrawn — it just bought you more rounds of rake.</i>");
+});
+$("offerNo").addEventListener("click",()=>{
+  S.offered=true;$("offerCard").style.display="none";
+  msg("Declined. Smart — but the loop continues anyway. 🎭 <i>Declining changes nothing about the math.</i>");
+});
+function triggerPush(){
+  if(S.pushDone){msg("No funds and no offers left. The honest move now: walk away.");return;}
+  $("pushCard").style.display="block";
+  msg("📲 <b>A push notification just arrived…</b>");
+}
+$("pushBtn").addEventListener("click",()=>{
+  S.bonus+=3;S.pushDone=true;$("pushCard").style.display="none";hud();
+  msg("Claimed <b>$3 BONUS cash</b> (expires in 2h). 🎭 <i>Sent because your balance hit zero and you went quiet. It can't be withdrawn — it can only buy more entries.</i><br><br>Tap <b>Next round</b> to keep playing — on their dime, still their rake.");
+  $("roundBtns").style.display="none";$("afterBtns").style.display="flex";$("nextBtn").style.display="block";
+});
+function showWithdraw(){
+  $("gHud").style.display="none";$("gWithdraw").style.display="block";
+  $("wdReal").textContent=money(S.real);
+  $("wdBonus").textContent=money(S.bonus)+" → $0.00";
+  const fric=[];
+  if(S.real<5)fric.push(`⛔ <b>Minimum withdrawal is $5</b> — you have ${money(S.real)}. You're ${money(5-S.real)} short. Deposit, or keep playing. <span class="tag pat">INDUSTRY PATTERN</span>`);
+  fric.push(`💸 <b>$1 withdrawal fee</b> <span class="tag doc">DOCUMENTED</span>`);
+  fric.push(`🎟️ Withdrawing <b>forfeits all ${money(S.bonus)} bonus cash</b> <span class="tag doc">DOCUMENTED</span>`);
+  fric.push(`🪪 Identity verification required`);
+  fric.push(`⏳ Arrives in 1–14 business days <span class="tag doc">DOCUMENTED</span>`);
+  fric.push(`🗣️ "Complete the withdrawal mission: play 3 more games" — reported at cash-out on Bingo Winner <span class="tag rep">PLAYERS REPORT</span>`);
+  $("wdFriction").innerHTML=fric.map(f=>`<div class="note" style="margin:8px 0">${f}</div>`).join("");
+  $("wdDone").style.display="none";$("wdBtn").style.display="block";
+  $("gWithdraw").scrollIntoView({behavior:"smooth"});
+}
+$("wdBtn").addEventListener("click",()=>{
+  if(S.real<5){
+    $("wdDone").style.display="block";
+    $("wdDone").innerHTML=`<div class="note warn"><b>Withdrawal blocked.</b> You can't reach the $5 minimum — the most common complaint about these apps. Your options, as designed: deposit more, or grind with bonus cash that can never leave.</div>`;
+    return;
+  }
+  const net=S.real-1, vaporized=S.bonus, lost=Math.round((S.deposited-net)*100)/100;
+  S.bonus=0;
+  $("wdBtn").style.display="none";
+  $("wdDone").style.display="block";
+  const resultColor=lost<=0?"var(--green)":"var(--red)";
+  const resultSign=lost<0?"+":lost>0?"−":"";
+  const resultLine=lost<0?"You quit early and beat the trap — the app was counting on you not to. Most players don't stop here.":
+    lost===0?"Exactly even — you got out with what you put in. Against a machine built to make quitting feel like losing, that's a win.":
+    "This is the drain: entry fees + 20% rake + bonus forfeiture + withdrawal friction. Every loop makes quitting harder and continuing easier.";
+  $("wdDone").innerHTML=`<div class="card" style="margin:12px 0 0">
+    <h3>📊 Final tally</h3>
+    <div class="wd-row"><span>You deposited</span><b>${money(S.deposited)}</b></div>
+    <div class="wd-row"><span>You withdrew (after $1 fee)</span><b>${money(net)}</b></div>
+    <div class="wd-row"><span>Bonus cash vaporized</span><b>${money(vaporized)}</b></div>
+    <div class="wd-row"><span>House rake from your entries</span><b style="color:var(--red)">${money(S.rake)}</b></div>
+    <div class="wd-row"><span><b>Your net result</b></span><b style="color:${resultColor}">${resultSign}${money(Math.abs(lost))}</b></div>
+    <p class="small" style="margin-top:10px">${resultLine}</p>
+  </div>`;
+  hud();
+});
+$("againBtn").addEventListener("click",()=>{
+  clearInterval(roundTimer);clearTimeout(daubTO);resetGame();
+  $("gWithdraw").style.display="none";$("gHud").style.display="none";$("gSetup").style.display="block";
+  $("offerCard").style.display="none";$("pushCard").style.display="none";
+  $("roundBtns").style.display="flex";$("afterBtns").style.display="none";
+});
+
+/* ---------- ACT 4: near-miss lab ---------- */
+let simInt=null;
+$("simBtn").addEventListener("click",()=>{
+  if(simInt)return;
+  let w=0,n=0,l=0,i=0;
+  $("simBtn").disabled=true;$("simMsg").textContent="";
+  simInt=setInterval(()=>{
+    const r=Math.random();
+    if(r<0.10)w++;else if(r<0.55)n++;else l++;
+    i++;
+    $("tWin").textContent=w;$("tNear").textContent=n;$("tLoss").textContent=l;
+    $("bWin").style.width=(w/20*100)+"%";$("bNear").style.width=(n/20*100)+"%";$("bLoss").style.width=(l/20*100)+"%";
+    if(i>=20){clearInterval(simInt);simInt=null;$("simBtn").disabled=false;
+      $("simMsg").innerHTML=`<b>${n} of 20 rounds</b> ended "one number away" — $0 paid. But each one whispered <i>"try again."</i> That's not luck being cruel; it's the reward schedule working as designed.`;}
+  },110);
+});
+
+/* ---------- ACT 5: credit radar ---------- */
+function radar(){
+  const h=+$("sHours").value, b=+$("sBal").value, l=+$("sLoss").value;
+  $("oHours").textContent=h+"h";$("oBal").textContent=money(b);$("oLoss").textContent=l;
+  const risk=Math.round(100*(0.45*(h/168)+0.30*(1-b/50)+0.25*(l/10)));
+  $("riskBar").style.width=risk+"%";
+  let offer,why;
+  if(risk<25){offer="📩 <b>Daily wheel-spin reminder.</b> Low pressure — just keeps the habit warm.";
+    why="You're active and funded. No need to spend bait yet; a nudge protects the streak.";}
+  else if(risk<50){offer="🔔 <b>Push: \"$2 BONUS cash — expires tonight! ⏰\"</b>";
+    why="Lull detected. A small expiring credit reactivates you at almost zero cost (it can't be withdrawn).";}
+  else if(risk<75){offer="🎁 <b>\"We miss you! $5 FREE credit\"</b> — bonus cash, naturally.";
+    why="Balance low + losses stacking = peak loss-chasing. Free credit converts frustration into more entry fees.";}
+  else{offer="📞 <b>VIP treatment: 25% loss rebate this weekend + double deposit bonus.</b>";
+    why="High-value players are 60–70% of operator revenue. At this risk level, you're being farmed, not helped.";}
+  $("offerOut").innerHTML=offer+`<br><br><span style="color:var(--teal)">🎭 Why now:</span> <span class="muted">${why}</span>`;
+}
+["sHours","sBal","sLoss"].forEach(id=>$(id).addEventListener("input",radar));
+radar();
+
+/* ---------- ACT 6: warning signs ---------- */
+const SIGNS=[
+ "Thinking about the game constantly, or planning the next session",
+ "Needing bigger bets / more play for the same excitement",
+ "Feeling restless or irritable when trying to cut down",
+ "Chasing losses — playing to win back what you lost",
+ "Lying to family or friends about how much you play or spend",
+ "Borrowing money or selling things to keep playing",
+ "Gambling has hurt a relationship, job, or schoolwork"
+];
+$("warnList").innerHTML=SIGNS.map((s,i)=>`<label class="check"><input type="checkbox" data-w="${i}"><span>${s}</span></label>`).join("");
+$("warnList").addEventListener("change",()=>{
+  const c=document.querySelectorAll("#warnList input:checked").length;
+  $("warnMsg").innerHTML=c===0?"Take your time — be honest with yourself. It stays on this page.":
+   c<=2?`You checked <b>${c}</b>. Even one or two is worth paying attention to — these are the NCPG's published warning signs.`:
+   `You checked <b>${c}</b>. That's a real signal, not a character flaw — and free, confidential help exists: <b style="color:var(--teal)">1-800-522-4700</b> (call) or text <b style="color:var(--teal)">800GAM</b>, 24/7.`;
+});
+/* ---------- Act 7: slot machine ---------- */
+const SYM=["🍒","🍋","🔔","⭐","💎","7️⃣"];
+let sl={bal:20,spins:0,wag:0,ret:0,real:0,theater:true,spinning:false,bonusPrize:0,bonusMarked:0};
+let bonusNudge=null;
+const slMsg=m=>{$("slotMsg").innerHTML=m;};
+const bmsg=m=>{$("bonusMsg").innerHTML=m;};
+function updSlot(){
+  $("slBal").textContent="$"+sl.bal.toFixed(2);
+  $("slSpins").textContent=sl.spins;
+  $("slWag").textContent="$"+sl.wag.toFixed(2);
+  $("slRet").textContent="$"+sl.ret.toFixed(2);
+  $("slReal").textContent="$"+sl.real.toFixed(2);
+}
+function slotOutcome(){
+  /* Payout math, kept honest: the base table returns 88.0¢ per $1 wagered —
+     0.2%×$50 + 0.4%×$20 + 1%×$10 + 3%×$5 + 10%×$2 + 10%×$1 + 30%×$0.50.
+     The top three outcomes (1.6% of spins) also trigger the bingo bonus round,
+     whose average prize is $3.125 → 1.6% × $3.125 = 5.0¢.
+     Total RTP = 88¢ + 5¢ = 93¢ per $1 — bonus included, the way real machines count it. */
+  const r=Math.random();
+  const pick=a=>a[Math.floor(Math.random()*a.length)];
+  const fruits=["🍒","🍋"];
+  if(r<0.002)return{reels:["7️⃣","7️⃣","7️⃣"],win:50,bonus:true,
+    note:"🚨 <b>JACKPOT — $50.00!</b> True odds: about 0.2%. This is the screenshot the ads are made of. The other 99.8% of spins pay for it."};
+  if(r<0.006)return{reels:["💎","💎","💎"],win:20,bonus:true,
+    note:"💎 <b>Three diamonds — $20.00!</b> Real wins happen. Every one of them is priced into the 93%."};
+  if(r<0.016)return{reels:["⭐","⭐","⭐"],win:10,bonus:true,
+    note:"⭐ <b>Three stars — $10.00!</b> Big enough to unlock the <b>bingo bonus round</b> below…"};
+  if(r<0.046)return{reels:["🔔","🔔","🔔"],win:5,
+    note:"🔔 Three bells — <b>$5.00</b>. A genuine win, worth five spins."};
+  if(r<0.146){const s=pick(fruits);
+    return{reels:[s,s,s],win:2,
+      note:"Three "+(s==="🍒"?"cherries":"lemons")+" — <b>$2.00</b>. Small wins keep the session alive. That is their job."};}
+  if(r<0.246){const abc=[pick(fruits),pick(fruits),pick(fruits)];
+    if(abc[0]===abc[1]&&abc[1]===abc[2])return{reels:abc,win:2,note:"Three of a kind — <b>$2.00</b>."};
+    return{reels:abc,win:1,note:"Mixed fruit — <b>$1.00 back</b>. Feels free. It still cost you a spin."};}
+  if(r<0.546){const small=["🍒","🍋","🔔","⭐"];
+    const s=pick(small);let o=pick(small);while(o===s)o=pick(small);
+    return{reels:[s,s,o].sort(()=>Math.random()-.5),win:0.5,
+      note:"🎺 <b>WIN! $0.50!</b> …on a $1.00 bet. You <b>lost 50¢</b> and got a parade. That is a <b>loss disguised as a win</b>."};}
+  if(r<0.626)return{reels:["7️⃣","7️⃣","💎"],win:0,
+    note:"7️⃣ 7️⃣ 💎 — <b>so close!</b> Your brain files this as \u201calmost won.\u201d The ledger files it as <b>$0</b>. Near misses are weighted into the display — layout, not luck."};
+  let a,b,c,g=0;
+  do{a=pick(SYM);b=pick(SYM);c=pick(SYM);g++;}while((a===b||b===c||a===c)&&g<50);
+  return{reels:[a,b,c],win:0,
+    note:pick(["Nothing. The quiet spins pay for the loud ones.",
+      "No win. Three seconds, 7¢ of expected value, gone.",
+      "Loss. Unremarkable — which is exactly why it is profitable."])};
+}
+function animateReels(final,done){
+  const ivs=[0,1,2].map(i=>{
+    const R=$("reel"+i);R.classList.add("spin");
+    return setInterval(()=>{setReel(i,SYM[Math.floor(Math.random()*SYM.length)]);},90);
+  });
+  [500,900,1300].forEach((t,i)=>setTimeout(()=>{
+    clearInterval(ivs[i]);
+    const R=$("reel"+i);setReel(i,final[i]);R.classList.remove("spin");
+    if(i===2)done();
+  },t));
+}
+const pickPrize=()=>{const r=Math.random();return r<0.5?2.5:r<0.8?3:r<0.95?4:7.5;};
+function showCoinOffer(){
+  $("coinOffer").style.display="block";
+  $("spinBtn").disabled=true;
+  slMsg("🪙 <b>Out of credits.</b> The machine goes quiet — and the store gets loud.");
+}
+$("spinBtn").addEventListener("click",()=>{
+  if(sl.spinning||$("bonusPanel").style.display==="block")return;
+  if(sl.bal<1){showCoinOffer();return;}
+  AudioSys.init();AudioSys.click();
+  sl.spinning=true;$("spinBtn").disabled=true;
+  sl.bal-=1;sl.spins++;sl.wag+=1;
+  document.querySelectorAll(".reel").forEach(r=>r.classList.remove("win"));
+  const o=slotOutcome();
+  const reveal=()=>{
+    sl.ret+=o.win;sl.bal+=o.win;updSlot();
+    if(o.win>=10)AudioSys.fanfare();else if(o.win>0)AudioSys.coin();
+    slMsg(o.note);
+    if(o.win>0)document.querySelectorAll(".reel").forEach(r=>r.classList.add("win"));
+    sl.spinning=false;$("spinBtn").disabled=false;
+    if(o.bonus)setTimeout(()=>startBonus(pickPrize()),1300);
+    else if(sl.bal<1)setTimeout(showCoinOffer,1300);
+  };
+  if(sl.theater){animateReels(o.reels,reveal);}
+  else{
+    o.reels.forEach((s,i)=>{const R=$("reel"+i);R.classList.remove("spin");setReel(i,s);});
+    reveal();
+    slMsg(o.note+" <i class='tag'>theater skipped — decided in ~1ms</i>");
+  }
+});
+$("truthBtn").addEventListener("click",()=>{
+  sl.theater=!sl.theater;
+  $("truthBtn").innerHTML=sl.theater
+    ?"🎭 Skip the theater: reveal outcomes instantly"
+    :"🎰 Theater mode: watch the reels spin";
+});
+$("buyCoins").addEventListener("click",()=>{
+  sl.real+=4.99;sl.bal+=20;updSlot();
+  $("coinOffer").style.display="none";$("spinBtn").disabled=false;
+  slMsg("Coin pack bought: <b class='gold'>$4.99 of real money</b> → $20.00 of play credits. The credits are pretend. The $4.99 was not.");
+});
+$("walkAway").addEventListener("click",()=>{
+  $("coinOffer").style.display="none";
+  const b=$("spinBtn");b.disabled=true;b.textContent="You walked away 🎓";
+  $("slotReset").style.display="block";
+  slMsg("Final tally: <b>"+sl.spins+"</b> spins, wagered <b>$"+sl.wag.toFixed(2)+"</b>, returned <b>$"+sl.ret.toFixed(2)+"</b>, real money spent <b class='gold'>$"+sl.real.toFixed(2)+"</b>. The house kept the difference — about 7¢ a spin, thousands of spins an hour, millions of players.");
+});
+$("slotReset").addEventListener("click",()=>{
+  sl={bal:20,spins:0,wag:0,ret:0,real:0,theater:sl.theater,spinning:false,bonusPrize:0,bonusMarked:0};
+  if(bonusNudge){clearInterval(bonusNudge);bonusNudge=null;}
+  const b=$("spinBtn");b.disabled=false;b.textContent="SPIN · $1.00";
+  $("slotReset").style.display="none";$("bonusPanel").style.display="none";$("coinOffer").style.display="none";
+  setReel(0,"🍒");setReel(1,"🍋");setReel(2,"🔔");
+  document.querySelectorAll(".reel").forEach(r=>r.classList.remove("win"));
+  updSlot();
+  slMsg("Fresh $20 of free credits. The machine forgot nothing — but the demo did. Watch the ledger this time.");
+});
+function startBonus(prize){
+  sl.bonusPrize=prize;sl.bonusMarked=0;
+  const armed=new Set();
+  $("bonusPrize").textContent="$"+prize.toFixed(2);
+  const pool=[...Array(75)].map((_,i)=>i+1).sort(()=>Math.random()-.5);
+  const card=pool.slice(0,9);
+  $("bonusGrid").innerHTML=card.map(n=>'<div class="cell" data-n="'+n+'"><span class="bl">'+bingoLetter(n)+"</span>"+n+"</div>").join("");
+  $("bonusPanel").style.display="block";$("cashoutBtn").style.display="none";
+  $("spinBtn").disabled=true;
+  const calls=[...card].sort(()=>Math.random()-.5).slice(0,3);
+  let ci=0;
+  bmsg("The bingo cash-out round: 3 balls — tap each on your card.");
+  const cells=()=>[...document.querySelectorAll("#bonusGrid .cell")];
+  if(bonusNudge){clearInterval(bonusNudge);bonusNudge=null;}
+  const bto=setInterval(()=>{
+    if(ci>=calls.length){
+      clearInterval(bto);
+      // idle nudge: without this the round stalls forever if the visitor never taps
+      bonusNudge=setInterval(()=>{
+        if(sl.bonusMarked>=3||$("bonusPanel").style.display!=="block"){clearInterval(bonusNudge);bonusNudge=null;return;}
+        bmsg("👆 Tap the <b class='gold'>glowing numbers</b> on your card — "+(3-sl.bonusMarked)+" to go. (The prize was fixed before the first ball — this is the ceremony.)");
+        cells().forEach(c=>{if(armed.has(+c.dataset.n))c.classList.add("target");});
+      },8000);
+      return;
+    }
+    const b=calls[ci++];
+    const call=bingoLetter(b)+" "+b;
+    armed.add(b);
+    cells().forEach(c=>{if(+c.dataset.n===b)c.classList.add("target");});
+    bmsg("Ball: <b class='gold'>"+call+"</b> — tap it on your card.");
+    if("speechSynthesis" in window){try{speechSynthesis.cancel();speechSynthesis.speak(new SpeechSynthesisUtterance(call));}catch(e){}}
+  },1600);
+  $("bonusGrid").querySelectorAll(".cell").forEach(c=>{
+    c.onclick=()=>{
+      const n=+c.dataset.n;
+      if(armed.has(n)){
+        armed.delete(n);
+        c.classList.remove("target");c.classList.add("hit");
+        sl.bonusMarked++;
+        if(sl.bonusMarked>=3){
+          cells().forEach(x=>x.classList.remove("target"));
+          bmsg("Card complete. The prize never changed — <b class='gold'>$"+prize.toFixed(2)+"</b>, fixed before the first ball was called.");
+          $("cashoutBtn").style.display="inline-block";
+        }
+      }
+    };
+  });
+}
+$("cashoutBtn").addEventListener("click",()=>{
+  if(bonusNudge){clearInterval(bonusNudge);bonusNudge=null;}
+  sl.bal+=sl.bonusPrize;sl.ret+=sl.bonusPrize;updSlot();
+  bmsg("💰 Cashed out <b class='gold'>$"+sl.bonusPrize.toFixed(2)+"</b>. Remember: that number was fixed before the first ball. The bingo was the envelope, not the letter.");
+  setTimeout(()=>{
+    $("bonusPanel").style.display="none";$("spinBtn").disabled=false;
+    slMsg("Bonus collected. Back to the floor — the spin button is waiting.");
+    if(sl.bal<1)showCoinOffer();
+  },2600);
+});
+
+/* ---------- procedural audio: silly music + sfx (all synthesized, no files) ---------- */
+/* ---------- optional asset overrides: behind-the-screen-assets/ ----------
+   The page tries each file in ASSETS (relative to the HTML file). Anything that
+   loads replaces the built-in procedural fallback; missing files are ignored. */
+const ASSET_BASE="behind-the-screen-assets/";
+const ASSETS={
+  "os.wallpaper":"os/wallpaper.png",
+  "os.icon.mail":"os/icons/mail.png",
+  "os.icon.messages":"os/icons/messages.png",
+  "os.icon.safari":"os/icons/safari.png",
+  "os.icon.photos":"os/icons/photos.png",
+  "os.icon.camera":"os/icons/camera.png",
+  "os.icon.settings":"os/icons/settings.png",
+  "os.icon.appstore":"os/icons/appstore.png",
+  "os.icon.phone":"os/icons/phone.png",
+  "os.icon.bingo":"os/icons/bingo-winner-icon.png",
+  "app.splashLogo":"app/splash-logo.png",
+  "app.bingo.cardBg":"app/bingo/card-bg.png",
+  "app.bingo.ball":"app/bingo/ball.png",
+  "app.slots.machineBg":"app/slots/machine-bg.png",
+  "app.slots.reel.cherry":"app/slots/reels/cherry.png",
+  "app.slots.reel.lemon":"app/slots/reels/lemon.png",
+  "app.slots.reel.bell":"app/slots/reels/bell.png",
+  "app.slots.reel.star":"app/slots/reels/star.png",
+  "app.slots.reel.diamond":"app/slots/reels/diamond.png",
+  "app.slots.reel.seven":"app/slots/reels/seven.png",
+  "app.audio.music.splash":"app/audio/music-splash.wav",
+  "app.audio.music.slots":"app/audio/music-slots.wav",
+  "app.audio.sfx.coin":"app/audio/sfx-coin.wav",
+  "app.audio.sfx.fanfare":"app/audio/sfx-fanfare.wav",
+  "app.audio.sfx.click":"app/audio/sfx-click.wav",
+  "app.audio.sfx.notif":"app/audio/sfx-notif.wav",
+  "app.audio.sfx.pop":"app/audio/sfx-pop.wav"
+};
+const AssetStore={img:{},audio:{}};
+const REEL_ASSET={"🍒":"app.slots.reel.cherry","🍋":"app.slots.reel.lemon","🔔":"app.slots.reel.bell","⭐":"app.slots.reel.star","💎":"app.slots.reel.diamond","7️⃣":"app.slots.reel.seven"};
+function symHTML(s){
+  const u=AssetStore.img[REEL_ASSET[s]];
+  return u?'<img class="rsym" src="'+u+'" alt="">':s;
+}
+function setReel(i,s){
+  const R=document.getElementById("reel"+i);
+  if(!R)return;
+  R.dataset.sym=s;
+  R.innerHTML=symHTML(s);
+}
+function paintReels(){
+  for(let i=0;i<3;i++){
+    const R=document.getElementById("reel"+i);
+    if(R&&R.dataset.sym)setReel(i,R.dataset.sym);
+  }
+}
+function applyImageAsset(key,url){
+  if(key==="os.wallpaper"){
+    document.querySelectorAll(".pscreen").forEach(e=>{e.style.backgroundImage="url('"+url+"')";e.style.backgroundSize="cover";e.style.backgroundPosition="center";});
+  }else if(key.indexOf("os.icon.")===0){
+    const app=key.slice(8);
+    document.querySelectorAll('.papp[data-app="'+app+'"] .picon').forEach(p=>{p.innerHTML='<img class="piconimg" src="'+url+'" alt="">';});
+  }else if(key==="app.splashLogo"){
+    document.querySelectorAll(".splash-logo").forEach(e=>{e.innerHTML='<img src="'+url+'" alt="Bingo Winner" style="max-width:300px;width:72vw">';});
+  }else if(key==="app.bingo.cardBg"){
+    const g=document.getElementById("bingoGrid");
+    if(g){g.style.backgroundImage="url('"+url+"')";g.style.backgroundSize="cover";g.style.backgroundPosition="center";g.style.padding="12px";g.style.borderRadius="16px";}
+  }else if(key==="app.bingo.ball"){
+    document.querySelectorAll(".called b").forEach(e=>{e.style.backgroundImage="url('"+url+"')";e.style.backgroundSize="contain";e.style.backgroundRepeat="no-repeat";e.style.backgroundPosition="center";});
+  }else if(key==="app.slots.machineBg"){
+    document.querySelectorAll("#slotCard .reels").forEach(e=>{e.style.backgroundImage="url('"+url+"')";e.style.backgroundSize="cover";e.style.backgroundPosition="center";e.style.borderRadius="14px";e.style.padding="12px 6px";});
+  }else if(key.indexOf("app.slots.reel.")===0){
+    paintReels();
+  }
+}
+function loadAssets(){
+  Object.keys(ASSETS).forEach(key=>{
+    const url=ASSET_BASE+ASSETS[key];
+    if(/\.(mp3|wav|ogg|m4a)$/i.test(url)){
+      const a=new Audio();
+      a.preload="auto";
+      a.addEventListener("canplaythrough",()=>{AssetStore.audio[key]=url;});
+      a.addEventListener("error",()=>{});
+      a.src=url;
+    }else{
+      const im=new Image();
+      im.onload=()=>{AssetStore.img[key]=url;applyImageAsset(key,url);};
+      im.onerror=()=>{};
+      im.src=url;
+    }
+  });
+}
+loadAssets();
+/* swap splash/slots music when the Slots section scrolls into view */
+(function(){
+  const sec=document.getElementById("slots");
+  if(!sec||!("IntersectionObserver" in window))return;
+  let inSlots=false;
+  new IntersectionObserver(es=>{
+    es.forEach(e=>{
+      const vis=e.isIntersecting&&e.intersectionRatio>=0.25;
+      if(vis!==inSlots){inSlots=vis;
+        if(AudioSys.seqTimer||AudioSys.musicEl)AudioSys.playMusic(vis?"slots":"splash");}
+    });
+  },{threshold:[0,0.25,0.5,1]}).observe(sec);
+})();
+const AudioSys={
+  ctx:null,musicGain:null,sfxGain:null,muted:false,seqTimer:null,step:0,
+  init(){
+    if(this.ctx)return;
+    const AC=window.AudioContext||window.webkitAudioContext;
+    if(!AC)return;
+    this.ctx=new AC();
+    this.musicGain=this.ctx.createGain();this.musicGain.gain.value=0.32;
+    this.musicGain.connect(this.ctx.destination);
+    this.sfxGain=this.ctx.createGain();this.sfxGain.gain.value=0.5;
+    this.sfxGain.connect(this.ctx.destination);
+  },
+  tone(f,t,dur,type,vol,dest,slide){
+    if(!this.ctx||this.muted)return;
+    try{
+      const o=this.ctx.createOscillator(),g=this.ctx.createGain();
+      o.type=type||"sine";o.frequency.setValueAtTime(f,t);
+      if(slide)o.frequency.exponentialRampToValueAtTime(slide,t+dur);
+      g.gain.setValueAtTime(0.0001,t);
+      g.gain.exponentialRampToValueAtTime(vol||0.4,t+0.02);
+      g.gain.exponentialRampToValueAtTime(0.0001,t+dur);
+      o.connect(g);g.connect(dest||this.sfxGain);
+      o.start(t);o.stop(t+dur+0.05);
+    }catch(e){}
+  },
+  now(){return this.ctx?this.ctx.currentTime:0;},
+  _sfx(key,vol){
+    const u=AssetStore.audio[key];
+    if(!u||this.muted)return !!u;
+    try{const a=new Audio(u);a.volume=(vol==null?0.5:vol);a.play().catch(()=>{});}catch(e){}
+    return true;
+  },
+  click(){this.init();if(this._sfx("app.audio.sfx.click",0.4))return;this.tone(660,this.now(),0.07,"square",0.12);},
+  coin(){if(this._sfx("app.audio.sfx.coin"))return;const t=this.now();this.tone(988,t,0.1,"sine",0.35);this.tone(1319,t+0.09,0.22,"sine",0.35);},
+  ding(){if(this._sfx("app.audio.sfx.notif"))return;const t=this.now();this.tone(880,t,0.16,"sine",0.3);this.tone(1175,t+0.13,0.28,"sine",0.25);},
+  pop(){this.init();if(this._sfx("app.audio.sfx.pop",0.5))return;this.tone(520,this.now(),0.09,"square",0.14,null,780);},
+  fanfare(){if(this._sfx("app.audio.sfx.fanfare"))return;const t=this.now(),self=this;
+    [523,659,784,1047,1319].forEach((f,i)=>self.tone(f,t+i*0.1,0.24,"triangle",0.35));},
+  musicEl:null,musicKind:null,
+  playMusic(kind){
+    this.init();
+    if(this.musicKind===kind)return;
+    this.musicKind=kind;
+    if(this.seqTimer){clearInterval(this.seqTimer);this.seqTimer=null;}
+    if(this.musicEl){try{this.musicEl.pause();}catch(e){}this.musicEl=null;}
+    const url=AssetStore.audio["app.audio.music."+kind];
+    if(url){
+      try{
+        const a=new Audio(url);a.loop=true;a.volume=this.muted?0:0.5;
+        a.play().catch(()=>{});this.musicEl=a;
+      }catch(e){this._startProcedural();}
+    }else this._startProcedural();
+  },
+  startMusic(){this.playMusic("splash");},
+  _startProcedural(){
+    this.init();
+    if(!this.ctx||this.seqTimer)return;
+    if(this.ctx.state==="suspended")this.ctx.resume();
+    const lead=[523,0,659,0,784,0,659,0,880,0,784,0,659,0,523,0,
+                587,0,698,0,880,0,784,0,698,0,659,0,587,0,523,0];
+    const bass=[131,0,196,0,98,0,196,0,147,0,196,0,165,0,196,0,
+                131,0,196,0,98,0,196,0,147,0,165,0,196,0,131,0];
+    const sd=60/140/2,self=this;
+    this.step=0;
+    const tick=function(){
+      if(!self.muted&&self.ctx){
+        const t=self.now()+0.06;
+        const L=lead[self.step],B=bass[self.step];
+        if(L)self.tone(L,t,sd*0.92,"triangle",0.20,self.musicGain);
+        if(B)self.tone(B,t,sd*0.92,"square",0.08,self.musicGain);
+        if(self.step%8===6)self.tone(1568,t,0.06,"sine",0.05,self.musicGain);
+      }
+      self.step=(self.step+1)%32;
+    };
+    tick();
+    this.seqTimer=setInterval(tick,sd*1000);
+  },
+  toggleMute(){
+    this.muted=!this.muted;
+    if(this.musicGain)this.musicGain.gain.value=this.muted?0:0.32;
+    if(this.sfxGain)this.sfxGain.gain.value=this.muted?0:0.5;
+    if(this.musicEl)try{this.musicEl.volume=this.muted?0:0.5;}catch(e){}
+    return this.muted;
+  }
+};
+function confetti(n){
+  n=n||120;
+  const c=document.createElement("canvas");
+  c.style.cssText="position:fixed;inset:0;pointer-events:none;z-index:9998";
+  document.body.appendChild(c);
+  const x=c.getContext("2d");c.width=innerWidth;c.height=innerHeight;
+  const cols=["#f5b942","#4fd1c5","#ff6b9d","#a78bfa","#7cfc00","#ffffff"];
+  const P=[];
+  for(let i=0;i<n;i++)P.push({x:Math.random()*c.width,y:-20-Math.random()*c.height*0.35,
+    w:6+Math.random()*8,h:8+Math.random()*10,vy:2+Math.random()*3.2,vx:-1.5+Math.random()*3,
+    r:Math.random()*Math.PI,vr:-0.12+Math.random()*0.24,col:cols[i%cols.length]});
+  let f=0;
+  (function anim(){
+    x.clearRect(0,0,c.width,c.height);
+    P.forEach(p=>{p.x+=p.vx;p.y+=p.vy;p.r+=p.vr;
+      x.save();x.translate(p.x,p.y);x.rotate(p.r);x.fillStyle=p.col;
+      x.fillRect(-p.w/2,-p.h/2,p.w,p.h);x.restore();});
+    if(++f<240)requestAnimationFrame(anim);else c.remove();
+  })();
+}
+function gtoast(m,ms){
+  const t=$("gtoast");t.textContent=m;t.classList.add("show");
+  clearTimeout(t._to);t._to=setTimeout(()=>t.classList.remove("show"),ms||2800);
+}
+
+/* ---------- iphone simulator ---------- */
+function tickClock(){try{const d=new Date();let h=d.getHours()%12||12;
+  $("ptime").textContent=h+":"+String(d.getMinutes()).padStart(2,"0");}catch(e){}}
+tickClock();setInterval(tickClock,15000);
+function showPScreen(id){
+  ["phome","pmail","pmailView"].forEach(s=>{$(s).style.display=(s===id)?"flex":"none";});
+}
+function ptoast(m){
+  const t=$("ptoast");t.textContent=m;t.classList.add("show");
+  clearTimeout(t._to);t._to=setTimeout(()=>t.classList.remove("show"),1800);
+}
+const PAPPS=[
+ {i:"✉️",l:"Mail",bg:"linear-gradient(180deg,#57b6f6,#1668dc)",a:"mail",b:3},
+ {i:"💬",l:"Messages",bg:"linear-gradient(180deg,#5df08a,#12a150)",a:"mock"},
+ {i:"🧭",l:"Safari",bg:"linear-gradient(180deg,#8fd8fb,#0369a1)",a:"mock"},
+ {i:"🌅",l:"Photos",bg:"linear-gradient(180deg,#fde68a,#d97706)",a:"mock"},
+ {i:"📷",l:"Camera",bg:"linear-gradient(180deg,#9aa3b2,#4b5563)",a:"mock"},
+ {i:"⚙️",l:"Settings",bg:"linear-gradient(180deg,#cbd5e1,#64748b)",a:"mock"},
+ {i:"🅰️",l:"App Store",bg:"linear-gradient(180deg,#60a5fa,#1d4ed8)",a:"mock"},
+ {i:"🎱",l:"Bingo Winner",bg:"linear-gradient(135deg,#f5b942,#e11d48)",a:"bingo",b:3,f:1}
+];
+const DOCK=[
+ {i:"📞",l:"Phone",bg:"linear-gradient(180deg,#5df08a,#12a150)",a:"phone"},
+ {i:"🧭",l:"Safari",bg:"linear-gradient(180deg,#8fd8fb,#0369a1)",a:"safari"},
+ {i:"💬",l:"Messages",bg:"linear-gradient(180deg,#5df08a,#12a150)",a:"messages"},
+ {i:"✉️",l:"Mail",bg:"linear-gradient(180deg,#57b6f6,#1668dc)",b:3,a:"mail"}
+];
+function pIcon(d){
+  const b=document.createElement("button");
+  b.className="papp"+(d.f?" flash":"");
+  b.dataset.app=d.a||"";
+  b.innerHTML='<span class="picon" style="background:'+d.bg+'">'+d.i+'</span>'+
+    '<span class="plabel">'+d.l+'</span>'+(d.b?'<span class="pbadge">'+d.b+'</span>':"");
+  b.setAttribute("aria-label",d.l);
+  b.addEventListener("click",()=>{
+    AudioSys.init();AudioSys.click();
+    if(d.a==="mail")showPScreen("pmail");
+    else if(d.a==="bingo")launchBingo();
+    else ptoast("📼 Mock app — nothing here but vibes.");
+  });
+  return b;
+}
+PAPPS.forEach(d=>$("pgrid").appendChild(pIcon(d)));
+DOCK.forEach(d=>$("pdock").appendChild(pIcon(d)));
+document.querySelectorAll(".pback").forEach(b=>
+  b.addEventListener("click",()=>{AudioSys.click();showPScreen(b.dataset.go);}));
+document.querySelectorAll(".pemail").forEach(e=>
+  e.addEventListener("click",()=>{AudioSys.init();AudioSys.click();showPScreen("pmailView");}));
+function pushNotif(n){
+  AudioSys.ding();
+  const el=document.createElement("button");
+  el.className="pnotif";
+  el.innerHTML='<span class="pnicon">'+n.i+'</span><span class="pntext"><b>'+n.t+'</b><span>'+n.b+'</span></span><span class="pntime">now</span>';
+  el.addEventListener("click",()=>{AudioSys.click();el.remove();showPScreen("pmail");});
+  $("pnotifs").appendChild(el);
+  setTimeout(()=>{if(el.parentNode){el.classList.add("out");setTimeout(()=>el.remove(),400);}},9000);
+}
+let phoneNotifsStarted=false;
+function startPhoneNotifs(){
+  if(phoneNotifsStarted)return;phoneNotifsStarted=true;
+  setTimeout(()=>pushNotif({i:"✉️",t:"JoyBox Rewards",b:"🎁 $30 FREE bonus cash is waiting in Bingo Winner!"}),1600);
+  setTimeout(()=>pushNotif({i:"🎱",t:"Bingo Winner",b:"🔥 You're on a LUCKY STREAK — don't let it cool off!"}),4600);
+  setTimeout(()=>pushNotif({i:"✉️",t:"JoyBox Rewards",b:"⏰ Last chance: your $30 bonus EXPIRES tonight!"}),8200);
+}
+(function(){
+  const sec=document.getElementById("phoneStage");
+  if(!sec||!("IntersectionObserver" in window)){startPhoneNotifs();return;}
+  const ob=new IntersectionObserver(es=>{
+    es.forEach(e=>{if(e.isIntersecting){startPhoneNotifs();ob.disconnect();}});
+  },{threshold:0.25});
+  ob.observe(sec);
+})();
+$("claimBtn").addEventListener("click",()=>{
+  AudioSys.init();AudioSys.fanfare();confetti(140);
+  $("claimZone").innerHTML='<div class="gmsg" style="margin:10px 0">✅ <b>$30.00 bonus cash added!</b><br><span style="font-size:13px">Withdrawable: <b>$0.00</b> — bonus cash can\u2019t be cashed out. The <i>next</i> deposit is real money.</span></div><button class="btn gold bigbtn" id="openBingo">OPEN BINGO WINNER</button>';
+  $("openBingo").addEventListener("click",launchBingo);
+});
+function launchBingo(){
+  AudioSys.init();
+  $("splash").style.display="flex";
+  document.body.style.overflow="hidden";
+}
+$("tapToPlay").addEventListener("click",()=>{
+  AudioSys.init();
+  if(AudioSys.ctx&&AudioSys.ctx.state==="suspended")AudioSys.ctx.resume();
+  AudioSys.startMusic();AudioSys.fanfare();confetti(90);
+  $("splash").style.display="none";
+  document.body.style.overflow="";
+  gtoast("😇 Plot twist: this “app” only exists to teach you how the real ones work.");
+  setTimeout(()=>{document.getElementById("matchmaking").scrollIntoView({behavior:"smooth"});},650);
+});
+$("musicBtn").addEventListener("click",()=>{
+  AudioSys.init();
+  const m=AudioSys.toggleMute();
+  $("musicBtn").textContent=m?"🔇":"🎵";
+  $("musicBtn").style.opacity=m?0.55:1;
+  gtoast(m?"🔇 Music & effects off — the caller voice has its own toggle":"🎵 Music & effects on");
+});
+
+/* ---------- read-aloud buttons on everything ---------- */
+(function(){
+  if(!("speechSynthesis" in window))return;
+  function stopAll(){
+    try{speechSynthesis.cancel();}catch(e){}
+    document.querySelectorAll(".listen-btn").forEach(b=>{
+      b.classList.remove("playing");b.dataset.playing="";b.innerHTML="🔊 Listen";
+    });
+  }
+  document.querySelectorAll(".hero, section.block .card, section.block .note, section.block .tool, .help-card, .sources, footer").forEach(el=>{
+    const btn=document.createElement("button");
+    btn.type="button"; btn.className="listen-btn";
+    btn.innerHTML="🔊 Listen";
+    btn.setAttribute("aria-label","Read this section aloud");
+    btn.addEventListener("click",ev=>{
+      ev.stopPropagation();
+      if(btn.dataset.playing==="1"){stopAll();return;}
+      const clone=el.cloneNode(true);
+      clone.querySelectorAll(".listen-btn").forEach(b=>b.remove());
+      const text=(clone.innerText||"").replace(/\s+/g," ").trim().slice(0,5000);
+      if(!text)return;
+      stopAll();
+      try{
+        const u=new SpeechSynthesisUtterance(text);
+        u.rate=0.95;
+        const done=()=>{btn.classList.remove("playing");btn.dataset.playing="";btn.innerHTML="🔊 Listen";};
+        u.onend=done; u.onerror=done;
+        btn.dataset.playing="1";btn.classList.add("playing");btn.innerHTML="⏸ Stop";
+        speechSynthesis.speak(u);
+      }catch(e){}
+    });
+    el.insertBefore(btn, el.firstChild);
+  });
+})();
+})();
+</script>
+</body>
+</html>
